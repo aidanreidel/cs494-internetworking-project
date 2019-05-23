@@ -1,6 +1,6 @@
 import socket
 host = ""
-port = 7
+port = 2000
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((host,port))
 s.listen(1)
