@@ -2,6 +2,8 @@
 
 This is a repo for our cs494 Internetworking protocols project!
 
+Currently this is a straight rip-off of the `getting started` tutorial from socket.io found at https://socket.io/get-started/chat/ Everyone has to get started somewhere right?
+
 # How to run this code
 
 This is a Node.js project, we are running node `v8.11.1`
