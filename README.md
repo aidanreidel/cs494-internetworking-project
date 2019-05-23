@@ -4,14 +4,30 @@ This is a repo for our cs494 Internetworking protocols project!
 
 # How to run this code
 
-First start on your local machine with:
+This is a Node.js project, we are running node `v8.11.1`
 
-```bash
-python server.py
+After cloning this project cd into the repo:
+
+```
+cd cs494-internetworking-project/
 ```
 
-Then start the client with:
+Then setup the project on your system by running:
 
-```bash
- python client.py
 ```
+npm i
+```
+
+After waiting for NPM to do its thing you should be able to run the project by running:
+
+```
+node index.js
+```
+
+Then in your favorite browser navigate to:
+
+```
+localhost:3000
+```
+
+to see that app do its thing. If you go that location on more than one tab you can chat with yourself, HOORAY!
