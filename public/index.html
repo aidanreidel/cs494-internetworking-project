@@ -45,6 +45,9 @@
   </head>
   <body>
     <ul id="messages"></ul>
+    <!--
+      <textarea id="name" ></textarea> 
+    -->
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
@@ -59,8 +62,12 @@
           $("#m").val("");
           return false;
         });
-        socket.on("chat message", function(msg) {
-          $("#messages").append($("<li>").text(msg));
+        socket.on("chat message", (username, msg) => {
+          console.log(username + ": " + msg);
+          $("#messages").append($("<li>").text(username + ": " + msg));
+        });
+        socket.on("connect", () => {
+          socket.emit("adduser", prompt("What's your name?"));
         });
       });
     </script>

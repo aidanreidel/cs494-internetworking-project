@@ -10,12 +10,18 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/");
 });
 
+const usernames = {};
+
 io.on("connection", function(socket) {
-  console.log("a user connected");
-  io.emit("chat message", "a user connected");
+  socket.on("adduser", username => {
+    usernames[username] = username;
+    socket.username = username;
+    console.log(usernames);
+    io.emit("chat message", "SERVER", username + " joined the room!");
+  });
 
   socket.on("chat message", function(msg) {
-    io.emit("chat message", msg);
+    io.emit("chat message", socket.username, msg);
   });
 
   socket.on("disconnect", function() {
