@@ -23,7 +23,9 @@ io.on("connection", function(socket) {
   socket.on("chat message", function(msg) {
     io.emit("chat message", socket.username, msg);
   });
-
+  socket.on("getUsers", fn => {
+    fn(usernames);
+  });
   socket.on("disconnect", function() {
     console.log("user disconnected");
   });
