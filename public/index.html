@@ -62,6 +62,12 @@
           $("#m").val("");
           return false;
         });
+	    	/*$('#data').keypress(function(e) {   // when the client hits ENTER on their keyboard
+		    	if(e.which == 13) {
+				    $(this).blur();
+				    $('#datasend').focus().click();
+			    }
+		    });*/
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
           $("#messages").append($("<li>").text(username + ": " + msg));
@@ -69,7 +75,22 @@
         socket.on("connect", () => {
           socket.emit("adduser", prompt("What's your name?"));
         });
+        socket.on("update rooms", (rooms, current_room) => {
+          $('#rooms').empty();
+	      	$.each(rooms, function(key, value) {
+			      if(value == current_room){
+			      	$('#rooms').append('<div>' + value + '</div>');
+			      }
+		      	else {
+		      		$('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+		      	}
+           });
+        });
       });
+
+      function switchRoom(room) {
+        socket.emit("switch room", room);
+      }
     </script>
   </body>
 </html>
