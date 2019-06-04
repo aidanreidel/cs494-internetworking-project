@@ -20,7 +20,7 @@ io.on("connection", function(socket) {
     socket.room = 'room1';     // store room name in the socket session for this client
     socket.join('room1');     // send client to room 1
     console.log(usernames);
-    io.emit("chat message", "SERVER", username + " joined room 1!"); // echo to client that that have joined
+    socket.emit("chat message", "SERVER", username + " joined room 1!"); // echo to client that that have joined
     socket.broadcast.to("room1").emit("chat message", "SERVER", username + " has connected to this room");
   });
 
@@ -31,7 +31,7 @@ io.on("connection", function(socket) {
   socket.on("switch room", function(newRoom) {
     socket.leave(socket.room);
     socket.join(newRoom);
-    io.emit("chat message", "SERVER", username + "You have connected to " + newRoom + "!");
+    socket.emit("chat message", "SERVER", username + "You have connected to " + newRoom + "!");
     io.broadcast.to(socket.room).emit("chat message", "SERVER", socket.username + " has left this room.");
     socket.room = newRoom;
     socket.broadcast.to(newRoom).emit("chat message", "SERVER", username + " has joined this room!");
