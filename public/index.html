@@ -76,10 +76,10 @@
         background: #eee;
       }
     </style>
-
     <script>
+      const joinData = data => Object.values(data).join("\n");
       $(function() {
-        var socket = io();
+        const socket = io();
         $("form").submit(function(e) {
           e.preventDefault(); // prevents page reloading
           socket.emit("chat message", $("#m").val());
@@ -100,15 +100,27 @@
           socket.emit("adduser", prompt("What's your name?"));
         });
         socket.on("update rooms", (rooms, current_room) => {
-          $('#rooms').empty();
+          $("#rooms").empty();
           $.each(rooms, function(key, value) {
-            if(value == current_room){
-              $('#rooms').append('<div>' + value + '</div>');
+            if (value == current_room) {
+              $("#rooms").append("<div>" + value + "</div>");
+            } else {
+              $("#rooms").append(
+                '<div><a href="#" onclick="switchRoom(\'' +
+                  value +
+                  "')\">" +
+                  value +
+                  "</a></div>"
+              );
             }
-            else {
-              $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
-            }
-           });
+          });
+        });
+        const showUsers = document.getElementById("showUsers");
+        showUsers.addEventListener("click", e => {
+          e.preventDefault();
+          socket.emit("getUsers", data => {
+            alert("Online Users:\n" + joinData(data));
+          });
         });
       });
 
@@ -116,7 +128,7 @@
         socket.emit("switch room", room);
       }
     </script>
-    
+
     <title>Socket.IO chat</title>
   </head>
 
@@ -130,18 +142,19 @@
     </div>
 
     <div class="main">
-        <h2>Messages</h2>
-        <span><ul id="messages"></ul></span>
-        <!--
+      <h2>Messages</h2>
+      <span><ul id="messages"></ul></span>
+      <!--
           <textarea id="name" ></textarea> 
         -->
-        <form id="message-box" action="">
-          <input id="m" autocomplete="off" /><button>Send</button>
-        </form>
+      <form id="message-box" action="">
+        <input id="m" autocomplete="off" /><button>Send</button>
+      </form>
     </div>
 
     <div class="column" id="users">
-        <h2>Online Users</h2>
+      <h2>Online Users</h2>
+      <button id="showUsers">showUsers</button>
     </div>
   </body>
 </html>

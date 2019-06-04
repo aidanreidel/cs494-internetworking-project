@@ -27,17 +27,9 @@ io.on("connection", function(socket) {
   socket.on("chat message", function(msg) {
     io.emit("chat message", socket.username, msg);
   });
-
-  socket.on("switch room", function(newRoom) {
-    socket.leave(socket.room);
-    socket.join(newRoom);
-    socket.emit("chat message", "SERVER", username + "You have connected to " + newRoom + "!");
-    io.broadcast.to(socket.room).emit("chat message", "SERVER", socket.username + " has left this room.");
-    socket.room = newRoom;
-    socket.broadcast.to(newRoom).emit("chat message", "SERVER", username + " has joined this room!");
-    socket.emit("update rooms", rooms, newRoom);
+  socket.on("getUsers", fn => {
+    fn(usernames);
   });
-
   socket.on("disconnect", function() {
 		io.sockets.emit("update users", usernames);            // update list of users in chat, client-side
 		socket.broadcast.emit("chat message", "SERVER", socket.username + ' has disconnected.'); 		// echo globally that this client has left
