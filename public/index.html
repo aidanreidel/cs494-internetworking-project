@@ -115,11 +115,21 @@
             }
           });
         });
-        const showUsers = document.getElementById("showUsers");
+        const users = document.getElementById("showUsers");
         showUsers.addEventListener("click", e => {
           e.preventDefault();
           socket.emit("getUsers", data => {
             alert("Online Users:\n" + joinData(data));
+          });
+        });
+        //append a li for each user in on the server
+        const userList = document.getElementById("users");
+        socket.on("update user list", data => {
+          Object.values(data).forEach(element => {
+            let li = document.createElement("li");
+            // li.setAttribute('class', 'item')
+            userList.appendChild(li);
+            li.innerHTML = element;
           });
         });
       });
@@ -154,6 +164,7 @@
 
     <div class="column" id="users">
       <h2>Online Users</h2>
+      <ul id="users"></ul>
       <button id="showUsers">showUsers</button>
     </div>
   </body>
