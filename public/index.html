@@ -99,8 +99,16 @@
           m.value = "";
         });
 
+        //append a li for each room on the server
+        socket.on("update rooms", data => {
+          removeChildren("room-list");
+          data.forEach(element => {
+            appendLi("room-list", element);
+          });
+        });
+
         //append a li for each user in on the server
-        socket.on("update user list", data => {
+        socket.on("update users", data => {
           removeChildren("userList");
           Object.values(data).forEach(element => {
             appendLi("userList", element);
@@ -136,7 +144,8 @@
     </header>
 
     <div class="column" id="menu">
-      <h2>Menu</h2>
+      <h2>Rooms</h2>
+      <ul id="room-list"></ul>
     </div>
 
     <div class="main">

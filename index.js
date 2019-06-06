@@ -24,7 +24,8 @@ io.on("connection", function(socket) {
     socket.broadcast
       .to("room1")
       .emit("chat message", "SERVER", username + " has connected to this room");
-    io.emit("update user list", usernames); // This sends the user list over to the client
+    io.emit("update users", usernames); // This sends the user list over to the client
+    io.emit("update rooms", rooms);
   });
 
   socket.on("chat message", function(msg) {
@@ -40,7 +41,7 @@ io.on("connection", function(socket) {
     socket.leave(socket.room);
     console.log(socket.username + " disconnected");
     delete usernames[socket.username];
-    io.sockets.emit("update user list", usernames); // update list of users in chat, client-side
+    io.sockets.emit("update users", usernames); // update list of users in chat, client-side
     console.log(usernames);
   });
 });
