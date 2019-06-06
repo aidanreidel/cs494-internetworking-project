@@ -86,12 +86,6 @@
           $("#m").val("");
           return false;
         });
-        /*$('#data').keypress(function(e) {   // when the client hits ENTER on their keyboard
-          if(e.which == 13) {
-            $(this).blur();
-           $('#datasend').focus().click();
-          }
-        });*/
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
           $("#messages").append($("<li>").text(username + ": " + msg));
@@ -115,12 +109,8 @@
             }
           });
         });
-       //append a li for each user in on the server
-        const removeChildren = myNode => {
-          while (myNode.firstChild) {
-            myNode.removeChild(myNode.firstChild);
-          }
-        };
+
+        //append a li for each user in on the server
         const userList = document.getElementById("userList");
         socket.on("update user list", data => {
           removeChildren(userList);
@@ -132,7 +122,12 @@
           });
         });
       });
-
+      //removes all appended children, takes in a document.getElementById(...)
+      const removeChildren = myNode => {
+        while (myNode.firstChild) {
+          myNode.removeChild(myNode.firstChild);
+        }
+      };
       function switchRoom(room) {
         socket.emit("switch room", room);
       }
