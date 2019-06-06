@@ -80,18 +80,25 @@
       const joinData = data => Object.values(data).join("\n");
       $(function() {
         const socket = io();
+        document.getElementById("message-box").addEventListener("submit", e => {
+          e.preventDefault();
+          const m = document.getElementById("m");
+          console.log(m);
+          socket.emit("chat message", m.value);
+          m.value = "";
+        });
+        /*
         $("form").submit(function(e) {
           e.preventDefault(); // prevents page reloading
           socket.emit("chat message", $("#m").val());
           $("#m").val("");
           return false;
         });
+        */
         const messages = document.getElementById("messages");
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
-          const message = document.createElement("li");
-          message.innerHTML = username + ": " + msg;
-          messages.appendChild(message);
+          appendLi("messages", username + ": " + msg);
         });
         socket.on("connect", () => {
           socket.emit("adduser", prompt("What's your name?"));
@@ -114,23 +121,24 @@
         });
 
         //append a li for each user in on the server
-        const userList = document.getElementById("userList");
         socket.on("update user list", data => {
-          removeChildren(userList);
+          removeChildren("userList");
           Object.values(data).forEach(element => {
             appendLi("userList", element);
           });
         });
       });
+      // Appends an li to a given list element
       const appendLi = (list, innerHTML) => {
         const l = document.getElementById(list);
-        let li = document.createElement("li");
+        const li = document.createElement("li");
         // li.setAttribute('class', 'item')
         l.appendChild(li);
         li.innerHTML = innerHTML;
       };
-      //removes all appended children, takes in a document.getElementById(...)
-      const removeChildren = myNode => {
+      //removes all appended children to a given element
+      const removeChildren = element => {
+        myNode = document.getElementById(element);
         while (myNode.firstChild) {
           myNode.removeChild(myNode.firstChild);
         }
