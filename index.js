@@ -30,21 +30,27 @@ io.on("connection", function(socket) {
   socket.on("chat message", function(msg) {
     io.emit("chat message", socket.username, msg);
   });
-  socket.on("getUsers", fn => {
-    fn(usernames);
-  });
   socket.on("disconnect", function() {
-    io.sockets.emit("update users", usernames); // update list of users in chat, client-side
+    if(typeof socket.username === 'undefined') return
     socket.broadcast.emit(
       "chat message",
       "SERVER",
       socket.username + " has disconnected."
     ); // echo globally that this client has left
     socket.leave(socket.room);
-    console.log("user disconnected");
+    console.log(socket.username + " disconnected");
+    delete usernames[socket.username];
+    io.sockets.emit("update user list", usernames); // update list of users in chat, client-side
+    console.log(usernames);
   });
 });
 
 http.listen(3000, () => {
   console.log("listening on *:3000");
 });
+/*
+  leaving this in as an example for now
+  socket.on("getUsers", fn => {
+    fn(usernames);
+  });
+  */

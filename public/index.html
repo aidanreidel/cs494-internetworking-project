@@ -86,12 +86,6 @@
           $("#m").val("");
           return false;
         });
-        /*$('#data').keypress(function(e) {   // when the client hits ENTER on their keyboard
-          if(e.which == 13) {
-            $(this).blur();
-           $('#datasend').focus().click();
-          }
-        });*/
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
           $("#messages").append($("<li>").text(username + ": " + msg));
@@ -115,16 +109,11 @@
             }
           });
         });
-        const users = document.getElementById("showUsers");
-        showUsers.addEventListener("click", e => {
-          e.preventDefault();
-          socket.emit("getUsers", data => {
-            alert("Online Users:\n" + joinData(data));
-          });
-        });
+
         //append a li for each user in on the server
-        const userList = document.getElementById("users");
+        const userList = document.getElementById("userList");
         socket.on("update user list", data => {
+          removeChildren(userList);
           Object.values(data).forEach(element => {
             let li = document.createElement("li");
             // li.setAttribute('class', 'item')
@@ -133,7 +122,12 @@
           });
         });
       });
-
+      //removes all appended children, takes in a document.getElementById(...)
+      const removeChildren = myNode => {
+        while (myNode.firstChild) {
+          myNode.removeChild(myNode.firstChild);
+        }
+      };
       function switchRoom(room) {
         socket.emit("switch room", room);
       }
@@ -164,8 +158,19 @@
 
     <div class="column" id="users">
       <h2>Online Users</h2>
-      <ul id="users"></ul>
-      <button id="showUsers">showUsers</button>
+      <ul id="userList"></ul>
     </div>
   </body>
 </html>
+<!--
+/*
+leaving this in as an example for now
+const users = document.getElementById("showUsers");
+showUsers.addEventListener("click", e => {
+  e.preventDefault();
+  socket.emit("getUsers", data => {
+    alert("Online Users:\n" + joinData(data));
+  });
+});
+*/
+-->
