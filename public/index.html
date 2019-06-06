@@ -115,14 +115,7 @@
             }
           });
         });
-        const users = document.getElementById("showUsers");
-        showUsers.addEventListener("click", e => {
-          e.preventDefault();
-          socket.emit("getUsers", data => {
-            alert("Online Users:\n" + joinData(data));
-          });
-        });
-        //append a li for each user in on the server
+       //append a li for each user in on the server
         const removeChildren = myNode => {
           while (myNode.firstChild) {
             myNode.removeChild(myNode.firstChild);
@@ -171,7 +164,18 @@
     <div class="column" id="users">
       <h2>Online Users</h2>
       <ul id="userList"></ul>
-      <button id="showUsers">showUsers</button>
     </div>
   </body>
 </html>
+<!--
+/*
+leaving this in as an example for now
+const users = document.getElementById("showUsers");
+showUsers.addEventListener("click", e => {
+  e.preventDefault();
+  socket.emit("getUsers", data => {
+    alert("Online Users:\n" + joinData(data));
+  });
+});
+*/
+-->

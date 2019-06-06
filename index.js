@@ -30,11 +30,7 @@ io.on("connection", function(socket) {
   socket.on("chat message", function(msg) {
     io.emit("chat message", socket.username, msg);
   });
-  socket.on("getUsers", fn => {
-    fn(usernames);
-  });
-  socket.on("disconnect", function() {
-    if (socket.username === undefined) return;
+ socket.on("disconnect", function() {
     socket.broadcast.emit(
       "chat message",
       "SERVER",
@@ -51,3 +47,10 @@ io.on("connection", function(socket) {
 http.listen(3000, () => {
   console.log("listening on *:3000");
 });
+  /*
+  leaving this in as an example for now
+  socket.on("getUsers", fn => {
+    fn(usernames);
+  });
+  */
+ 
