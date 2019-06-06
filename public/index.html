@@ -120,6 +120,48 @@
           myNode.removeChild(myNode.firstChild);
         }
       };
+    </script>
+
+    <title>Socket.IO chat</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>Messenger Application</h1>
+    </header>
+
+    <div class="column" id="menu">
+      <h2>Menu</h2>
+    </div>
+
+    <div class="main">
+      <h2>Messages</h2>
+      <span><ul id="messages"></ul></span>
+
+      <form id="message-box" action="">
+        <input id="m" autocomplete="off" /><button>Send</button>
+      </form>
+    </div>
+
+    <div class="column" id="users">
+      <h2>Online Users</h2>
+      <ul id="userList"></ul>
+    </div>
+  </body>
+</html>
+<!-- Junkpile below, for upcoming reference 
+/*
+leaving this in as an example for now
+const users = document.getElementById("showUsers");
+showUsers.addEventListener("click", e => {
+  e.preventDefault();
+  socket.emit("getUsers", data => {
+    alert("Online Users:\n" + joinData(data));
+  });
+});
+*/
+-->
+<!--
       // socket.on("update rooms", (rooms, current_room) => {
       //   $("#rooms").empty();
       //   $.each(rooms, function(key, value) {
@@ -139,46 +181,4 @@
       // function switchRoom(room) {
       //   socket.emit("switch room", room);
       // }
-    </script>
-
-    <title>Socket.IO chat</title>
-  </head>
-
-  <body>
-    <header>
-      <h1>Messenger Application</h1>
-    </header>
-
-    <div class="column" id="menu">
-      <h2>Menu</h2>
-    </div>
-
-    <div class="main">
-      <h2>Messages</h2>
-      <span><ul id="messages"></ul></span>
-      <!--
-          <textarea id="name" ></textarea> 
-        -->
-      <form id="message-box" action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
-      </form>
-    </div>
-
-    <div class="column" id="users">
-      <h2>Online Users</h2>
-      <ul id="userList"></ul>
-    </div>
-  </body>
-</html>
-<!--
-/*
-leaving this in as an example for now
-const users = document.getElementById("showUsers");
-showUsers.addEventListener("click", e => {
-  e.preventDefault();
-  socket.emit("getUsers", data => {
-    alert("Online Users:\n" + joinData(data));
-  });
-});
-*/
 -->
