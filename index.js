@@ -3,7 +3,7 @@
   guide, which can be found at: https://socket.io/get-started/chat/
 */
 var app = require("express")();
-var http = require("http").createServer(app);
+var http = require("http").Server(app);
 var io = require("socket.io")(http);
 
 app.get("/", (req, res) => {
@@ -31,7 +31,7 @@ io.on("connection", function(socket) {
     io.emit("chat message", socket.username, msg);
   });
   socket.on("disconnect", function() {
-    if(typeof socket.username === 'undefined') return
+    if (typeof socket.username === "undefined") return;
     socket.broadcast.emit(
       "chat message",
       "SERVER",

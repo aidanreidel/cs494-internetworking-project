@@ -2,7 +2,6 @@
 <html>
   <head>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 
     <style>
       * {
@@ -78,59 +77,49 @@
     </style>
     <script>
       const joinData = data => Object.values(data).join("\n");
-      $(function() {
-        const socket = io();
-        $("form").submit(function(e) {
-          e.preventDefault(); // prevents page reloading
-          socket.emit("chat message", $("#m").val());
-          $("#m").val("");
-          return false;
-        });
+      const socket = io();
+      socket.on("connect", () => {
+        socket.emit("adduser", prompt("What's your name?"));
+
+        const messages = document.getElementById("messages");
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
-          $("#messages").append($("<li>").text(username + ": " + msg));
+          appendLi("messages", username + ": " + msg);
         });
-        socket.on("connect", () => {
-          socket.emit("adduser", prompt("What's your name?"));
-        });
-        socket.on("update rooms", (rooms, current_room) => {
-          $("#rooms").empty();
-          $.each(rooms, function(key, value) {
-            if (value == current_room) {
-              $("#rooms").append("<div>" + value + "</div>");
-            } else {
-              $("#rooms").append(
-                '<div><a href="#" onclick="switchRoom(\'' +
-                  value +
-                  "')\">" +
-                  value +
-                  "</a></div>"
-              );
-            }
-          });
+
+        document.getElementById("message-box").addEventListener("submit", e => {
+          e.preventDefault();
+          const m = document.getElementById("m");
+          socket.emit("chat message", m.value);
+          m.value = "";
         });
 
         //append a li for each user in on the server
-        const userList = document.getElementById("userList");
         socket.on("update user list", data => {
-          removeChildren(userList);
+          removeChildren("userList");
           Object.values(data).forEach(element => {
-            let li = document.createElement("li");
-            // li.setAttribute('class', 'item')
-            userList.appendChild(li);
-            li.innerHTML = element;
+            appendLi("userList", element);
           });
         });
       });
-      //removes all appended children, takes in a document.getElementById(...)
-      const removeChildren = myNode => {
+
+      // Helper Functions
+
+      // Appends an li to a given list element
+      const appendLi = (list, innerHTML) => {
+        const l = document.getElementById(list);
+        const li = document.createElement("li");
+        // li.setAttribute('class', 'item')
+        l.appendChild(li);
+        li.innerHTML = innerHTML;
+      };
+      //removes all appended children to a given element
+      const removeChildren = element => {
+        myNode = document.getElementById(element);
         while (myNode.firstChild) {
           myNode.removeChild(myNode.firstChild);
         }
       };
-      function switchRoom(room) {
-        socket.emit("switch room", room);
-      }
     </script>
 
     <title>Socket.IO chat</title>
@@ -148,9 +137,7 @@
     <div class="main">
       <h2>Messages</h2>
       <span><ul id="messages"></ul></span>
-      <!--
-          <textarea id="name" ></textarea> 
-        -->
+
       <form id="message-box" action="">
         <input id="m" autocomplete="off" /><button>Send</button>
       </form>
@@ -162,7 +149,7 @@
     </div>
   </body>
 </html>
-<!--
+<!-- Junkpile below, for upcoming reference 
 /*
 leaving this in as an example for now
 const users = document.getElementById("showUsers");
@@ -173,4 +160,25 @@ showUsers.addEventListener("click", e => {
   });
 });
 */
+-->
+<!--
+      // socket.on("update rooms", (rooms, current_room) => {
+      //   $("#rooms").empty();
+      //   $.each(rooms, function(key, value) {
+      //     if (value == current_room) {
+      //       $("#rooms").append("<div>" + value + "</div>");
+      //     } else {
+      //       $("#rooms").append(
+      //         '<div><a href="#" onclick="switchRoom(\'' +
+      //           value +
+      //           "')\">" +
+      //           value +
+      //           "</a></div>"
+      //       );
+      //     }
+      //   });
+      // });
+      // function switchRoom(room) {
+      //   socket.emit("switch room", room);
+      // }
 -->
