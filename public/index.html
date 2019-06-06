@@ -83,18 +83,10 @@
         document.getElementById("message-box").addEventListener("submit", e => {
           e.preventDefault();
           const m = document.getElementById("m");
-          console.log(m);
           socket.emit("chat message", m.value);
           m.value = "";
         });
-        /*
-        $("form").submit(function(e) {
-          e.preventDefault(); // prevents page reloading
-          socket.emit("chat message", $("#m").val());
-          $("#m").val("");
-          return false;
-        });
-        */
+
         const messages = document.getElementById("messages");
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
