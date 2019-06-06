@@ -2,7 +2,6 @@
 <html>
   <head>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 
     <style>
       * {
@@ -78,38 +77,21 @@
     </style>
     <script>
       const joinData = data => Object.values(data).join("\n");
-      $(function() {
-        const socket = io();
-        document.getElementById("message-box").addEventListener("submit", e => {
-          e.preventDefault();
-          const m = document.getElementById("m");
-          socket.emit("chat message", m.value);
-          m.value = "";
-        });
+      const socket = io();
+      socket.on("connect", () => {
+        socket.emit("adduser", prompt("What's your name?"));
 
         const messages = document.getElementById("messages");
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
           appendLi("messages", username + ": " + msg);
         });
-        socket.on("connect", () => {
-          socket.emit("adduser", prompt("What's your name?"));
-        });
-        socket.on("update rooms", (rooms, current_room) => {
-          $("#rooms").empty();
-          $.each(rooms, function(key, value) {
-            if (value == current_room) {
-              $("#rooms").append("<div>" + value + "</div>");
-            } else {
-              $("#rooms").append(
-                '<div><a href="#" onclick="switchRoom(\'' +
-                  value +
-                  "')\">" +
-                  value +
-                  "</a></div>"
-              );
-            }
-          });
+
+        document.getElementById("message-box").addEventListener("submit", e => {
+          e.preventDefault();
+          const m = document.getElementById("m");
+          socket.emit("chat message", m.value);
+          m.value = "";
         });
 
         //append a li for each user in on the server
@@ -120,6 +102,9 @@
           });
         });
       });
+
+      // Helper Functions
+
       // Appends an li to a given list element
       const appendLi = (list, innerHTML) => {
         const l = document.getElementById(list);
@@ -135,9 +120,25 @@
           myNode.removeChild(myNode.firstChild);
         }
       };
-      function switchRoom(room) {
-        socket.emit("switch room", room);
-      }
+      // socket.on("update rooms", (rooms, current_room) => {
+      //   $("#rooms").empty();
+      //   $.each(rooms, function(key, value) {
+      //     if (value == current_room) {
+      //       $("#rooms").append("<div>" + value + "</div>");
+      //     } else {
+      //       $("#rooms").append(
+      //         '<div><a href="#" onclick="switchRoom(\'' +
+      //           value +
+      //           "')\">" +
+      //           value +
+      //           "</a></div>"
+      //       );
+      //     }
+      //   });
+      // });
+      // function switchRoom(room) {
+      //   socket.emit("switch room", room);
+      // }
     </script>
 
     <title>Socket.IO chat</title>
