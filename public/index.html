@@ -118,13 +118,17 @@
         socket.on("update user list", data => {
           removeChildren(userList);
           Object.values(data).forEach(element => {
-            let li = document.createElement("li");
-            // li.setAttribute('class', 'item')
-            userList.appendChild(li);
-            li.innerHTML = element;
+            appendLi("userList", element);
           });
         });
       });
+      const appendLi = (list, innerHTML) => {
+        const l = document.getElementById(list);
+        let li = document.createElement("li");
+        // li.setAttribute('class', 'item')
+        l.appendChild(li);
+        li.innerHTML = innerHTML;
+      };
       //removes all appended children, takes in a document.getElementById(...)
       const removeChildren = myNode => {
         while (myNode.firstChild) {
