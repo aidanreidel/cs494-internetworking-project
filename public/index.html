@@ -123,8 +123,14 @@
           });
         });
         //append a li for each user in on the server
-        const userList = document.getElementById("users");
+        const removeChildren = myNode => {
+          while (myNode.firstChild) {
+            myNode.removeChild(myNode.firstChild);
+          }
+        };
+        const userList = document.getElementById("userList");
         socket.on("update user list", data => {
+          removeChildren(userList);
           Object.values(data).forEach(element => {
             let li = document.createElement("li");
             // li.setAttribute('class', 'item')
@@ -164,7 +170,7 @@
 
     <div class="column" id="users">
       <h2>Online Users</h2>
-      <ul id="users"></ul>
+      <ul id="userList"></ul>
       <button id="showUsers">showUsers</button>
     </div>
   </body>

@@ -34,14 +34,17 @@ io.on("connection", function(socket) {
     fn(usernames);
   });
   socket.on("disconnect", function() {
-    io.sockets.emit("update users", usernames); // update list of users in chat, client-side
+    if (socket.username === undefined) return;
     socket.broadcast.emit(
       "chat message",
       "SERVER",
       socket.username + " has disconnected."
     ); // echo globally that this client has left
+    delete usernames[socket.username];
     socket.leave(socket.room);
     console.log("user disconnected");
+    io.sockets.emit("update user list", usernames); // update list of users in chat, client-side
+    console.log(usernames);
   });
 });
 
