@@ -86,9 +86,12 @@
           $("#m").val("");
           return false;
         });
+        const messages = document.getElementById("messages");
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
-          $("#messages").append($("<li>").text(username + ": " + msg));
+          const message = document.createElement("li");
+          message.innerHTML = username + ": " + msg;
+          messages.appendChild(message);
         });
         socket.on("connect", () => {
           socket.emit("adduser", prompt("What's your name?"));
