@@ -100,10 +100,20 @@
         });
 
         //append a li for each room on the server
-        socket.on("update rooms", data => {
+        socket.on("update rooms", (roomList, room) => {
           removeChildren("room-list");
-          data.forEach(element => {
-            appendLi("room-list", element);
+          roomList.forEach(element => {
+            if (element === room) appendLi("room-list", element);
+            else {
+              appendLi(
+                "room-list",
+                '<a href="#" onclick="changeRoom(\'' +
+                  element +
+                  "')\">" +
+                  element +
+                  "</a>"
+              );
+            }
           });
         });
 
@@ -117,6 +127,8 @@
       });
 
       // Helper Functions
+
+      const changeRoom = room => socket.emit("change room", room);
 
       // Appends an li to a given list element
       const appendLi = (list, innerHTML) => {
