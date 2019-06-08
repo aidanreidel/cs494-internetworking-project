@@ -22,15 +22,39 @@ io.on("connection", function(socket) {
     console.log(usernames);
     socket.emit("chat message", "SERVER", username + " joined room 1!"); // echo to client that that have joined
     socket.broadcast
-      .to("room1")
+      .to("room1") //Maybe list traversal here
       .emit("chat message", "SERVER", username + " has connected to this room");
     io.emit("update users", usernames); // This sends the user list over to the client
-    io.emit("update rooms", rooms);
+    io.emit("update rooms", rooms, socket.room);
   });
 
+  // Can a user be in more than one room at a time, but only see messages from one?
+  // Lets find out!
   socket.on("chat message", function(msg) {
     io.emit("chat message", socket.username, msg);
   });
+
+  socket.on("change room", newroom => {
+    socket.leave(socket.room);
+    socket.join(newroom);
+    // Alert user they changed rooms
+    socket.emit("chat message", "SERVER", "you have connected to " + newroom);
+    // Alert rooms you left / joined
+    socket.broadcast
+      .to(socket.room)
+      .emit("chat message", "SERVER", socket.username + " has left this room");
+    socket.broadcast
+      .to(newroom)
+      .emit(
+        "chat message",
+        "SERVER",
+        socket.username + " has joined this room"
+      );
+    // Update room session info
+    socket.room = newroom;
+    socket.emit("update rooms", rooms, newroom);
+  });
+
   socket.on("disconnect", function() {
     if (typeof socket.username === "undefined") return;
     socket.broadcast.emit(
