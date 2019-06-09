@@ -12,13 +12,13 @@ app.get("/", (req, res) => {
 
 const usernames = {};
 let allRooms = ["Home"];    // List of all rooms available
-let yourRooms = ["Home"];   // List of user's rooms available
-// Initialize the first chat room history
-let history = {
+let history = {             // Initialize the first chat room history
   Home: []
 };
 
 io.on("connection", function(socket) {
+  let yourRooms = ["Home"];   // List of user's rooms available
+
   socket.on("adduser", username => {
     usernames[username] = username;
     socket.username = username;
@@ -59,13 +59,13 @@ io.on("connection", function(socket) {
   // Lets find out!
   socket.on("chat message", function(msg) {
     // Checks message information
-    msg = msg.trim();   // trim white space from front and back of string
+    msg = msg.trim();                         // trim white space from front and back of string
     msg = msg.replace(/[^\x00-\x7F]/g, '');   // Removes non-ASCII characters
-    if (msg.length == 0) {  // No message to be sent
+    if (msg.length == 0) {                    // No message to be sent
       socket.emit("chat message", "SERVER", "No valid message was present, nothing was sent to this room.");
       return;
     }
-    if (msg.length > 160) {   // Error sending over 160 characters
+    if (msg.length > 160) {                   // Error sending over 160 characters
       socket.emit("chat message", "SERVER", "Only a maximum of 160 characters can be sent. Please try again.");
       return;
     }

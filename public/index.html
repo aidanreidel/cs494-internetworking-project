@@ -53,7 +53,7 @@
         list-style-type: none;
         padding: 5px;
       }
-      #create-room-btn, #remove-room-btn, #join-room-btn {
+      #create-room-btn, #leave-room-btn, #remove-room-btn, #join-room-btn {
         width: 190px;
         height: 40px;
         font-size: 20px;
@@ -66,13 +66,16 @@
       #create-room, #create-room-btn {
         border: 3px solid #4caf50;
       }
+      #leave-room, #leave-room-btn {
+        border: 3px solid blue;
+      }
       #join-room, #join-room-btn {
         border: 3px solid yellow;
       }
       #remove-room, #remove-room-btn {
         border: 3px solid purple;
       }
-      #create-room, #join-room, #remove-room {
+      #create-room, #leave-room, #join-room, #remove-room {
         display: none;
         width: 190px;
         /* height: 190px; */
@@ -191,7 +194,7 @@
         document.getElementById("remove-room").addEventListener("submit", e => {
           e.preventDefault();
           // remove selected room
-          socket.emit("Roomlist", room)
+          socket.emit("Roomlist", room);
           // clear selected item?? close box?? update dynamic list??
         });
 
@@ -269,18 +272,38 @@
       function openJoinForm() {
         document.getElementById("join-room").style.display = "block";
         document.getElementById("join-room-btn").style.display = "none";
+        closeLeaveForm();
+        closeCreateForm();
+        closeRemoveForm();
+      }
+      function openLeaveForm() {
+        document.getElementById("leave-room").style.display = "block";
+        document.getElementById("leave-room-btn").style.display = "none";
+        closeJoinForm();
+        closeCreateForm();
+        closeRemoveForm();
       }
       function openCreateForm() {
         document.getElementById("create-room").style.display = "block";
         document.getElementById("create-room-btn").style.display = "none";
+        closeLeaveForm();
+        closeJoinForm();
+        closeRemoveForm();
       }
       function openRemoveForm() {
         document.getElementById("remove-room").style.display = "block";
         document.getElementById("remove-room-btn").style.display = "none";
+        closeLeaveForm();
+        closeCreateForm();
+        closeJoinForm();
       }
       function closeJoinForm() {
         document.getElementById("join-room-btn").style.display = "block";
         document.getElementById("join-room").style.display = "none";
+      }
+      function closeLeaveForm() {
+        document.getElementById("leave-room-btn").style.display = "block";
+        document.getElementById("leave-room").style.display = "none";
       }
       function closeCreateForm() {
         document.getElementById("create-room-btn").style.display = "block";
@@ -304,10 +327,12 @@
       <h2>Rooms</h2>
       <ul id="room-list"></ul>
 
+      <!-- Join a room -->
       <button id="join-room-btn" onclick="openJoinForm()"><b>Join Room</b></button>
       <div class="form-popup">
         <form class="join-room-form" id="join-room">
           <h3>Join Room</h3>
+          Select a room to connect to!
           <!--List Available Rooms-->
           <div id="join-roomList"></div>
 
@@ -316,11 +341,27 @@
         </form>
       </div>
 
+      <!-- Join a room that the user is connected to -->
+      <button id="leave-room-btn" onclick="openLeaveForm()"><b>Leave Room</b></button>
+      <div class="form-popup">
+        <form  class="leave-room" id="leave-room">
+            <h3>Leave Room</h3>
+            Select the room you want to disconnect from
+            <!--List available rooms-->
+            <ul id="leave-roomList"></ul>
+
+            <input type="submit" id="submit-btn" value="Submit">
+            <input type="button" class="close-btn" onclick="closeLeaveForm()" value="Cancel">
+        </form>
+      </div>
+
+      <!-- Create a room that all users can join -->
       <button id="create-room-btn" onclick="openCreateForm()"><b>Create Room</b></button>
       <div class="form-popup">
         <form class="create-room-form" id="create-room">
             <h3>Create Room</h3>
-            <label for="roomName">Enter Room Name</label>
+            Can't find the room that you're looking for? Create one!<br>
+            <!-- <label for="roomName">Enter Room Name</label> -->
             <input type="text" id="newRoomName" placeholder="Room Name" name="roomName" required>
 
             <input type="submit" id="submit-btn" value="Submit">
@@ -328,10 +369,12 @@
         </form>
       </div>
 
+      <!-- Delete a room so no users can join -->
       <button id="remove-room-btn" onclick="openRemoveForm()"><b>Remove Room</b></button>
       <div class="form-popup">
         <form  class="remove-room" id="remove-room">
             <h3>Remove Room</h3>
+            Let's clear up rooms not needed! Select one that you want to remove from the server
             <!--List available rooms-->
             <ul id="remove-roomList"></ul>
 
