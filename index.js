@@ -26,7 +26,7 @@ io.on("connection", function(socket) {
     socket.join("Home"); // send client to room 1
     console.log(usernames);
     socket.emit("update rooms", history[socket.room], allRooms, socket.room);
-    socket.emit("chat message", "SERVER", username + " joined room 1!"); // echo to client that that have joined
+    socket.emit("chat message", "SERVER", username + " joined the Home Room!"); // echo to client that that have joined
     socket.broadcast
       .to("Home") //Maybe list traversal here
       .emit("chat message", "SERVER", username + " has connected to this room");
@@ -58,6 +58,17 @@ io.on("connection", function(socket) {
   // Can a user be in more than one room at a time, but only see messages from one?
   // Lets find out!
   socket.on("chat message", function(msg) {
+    // Checks message information
+    msg = msg.trim();   // trim white space from front and back of string
+    msg = msg.replace(/[^\x00-\x7F]/g, '');   // Removes non-ASCII characters
+    if (msg.length == 0) {  // No message to be sent
+      socket.emit("chat message", "SERVER", "No valid message was present, nothing was sent to this room.");
+      return;
+    }
+    if (msg.length > 160) {   // Error sending over 160 characters
+      socket.emit("chat message", "SERVER", "Only a maximum of 160 characters can be sent. Please try again.");
+      return;
+    }
     // Start a chat history if there isn't one
     if (!history[socket.room]) history[socket.room] = [];
     // Append this message into the specific room's chat history
