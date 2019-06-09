@@ -40,11 +40,13 @@ io.on("connection", function(socket) {
       socket.room = roomname; // store room name in the socket session for this client
       socket.join(roomname); // send client to new room
       console.log(rooms);    // log all rooms to console
+      history[roomname] = [];
+
       socket.emit("chat message", "SERVER", socket.username + " joined " + roomname + "!! Welcome in!"); // echo to client that that have joined
       socket.broadcast.to(roomname) //Maybe list traversal here
         .emit("chat message", "SERVER", socket.username + " has connected to this room");
       io.emit("update users", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
-      io.emit("update rooms", rooms, socket.room);
+      socket.emit("update rooms", history[socket.room], rooms, socket.room);
     }
     else {
       console.log(roomname + " already exists");
