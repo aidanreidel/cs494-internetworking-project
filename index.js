@@ -58,17 +58,9 @@ io.on("connection", function(socket) {
   // Can a user be in more than one room at a time, but only see messages from one?
   // Lets find out!
   socket.on("chat message", function(msg) {
-    // Checks message information
-    msg = msg.trim();                         // trim white space from front and back of string
-    msg = msg.replace(/[^\x00-\x7F]/g, '');   // Removes non-ASCII characters
-    if (msg.length == 0) {                    // No message to be sent
-      socket.emit("chat message", "SERVER", "No valid message was present, nothing was sent to this room.");
-      return;
-    }
-    if (msg.length > 160) {                   // Error sending over 160 characters
-      socket.emit("chat message", "SERVER", "Only a maximum of 160 characters can be sent. Please try again.");
-      return;
-    }
+    msg = validateMsg(msg);
+    if (msg == null) return;
+
     // Start a chat history if there isn't one
     if (!history[socket.room]) history[socket.room] = [];
     // Append this message into the specific room's chat history
@@ -76,6 +68,19 @@ io.on("connection", function(socket) {
     console.log(history); // TODO: remove
     //send the message to the room in question
     io.in(socket.room).emit("chat message", socket.username, msg);
+  });
+
+  socket.on("chat message-all", function(msg) {
+    msg = validateMsg(msg);       // Validates the message given
+    if (msg == null) return;
+
+    // Sends message to each room in allRooms (Currently)
+    allRooms.forEach(function(element) {
+      if (!history[element]) history[element] = [];
+      history[element].push(socket.username + ": " + msg);
+      console.log(history[element]);
+      io.in(element).emit("chat message", socket.username, msg);
+    });
   });
 
   socket.on("change room", newroom => {
@@ -112,6 +117,20 @@ io.on("connection", function(socket) {
     io.sockets.emit("update users", usernames); // update list of users in chat, client-side
     console.log(usernames);
   });
+
+  function validateMsg(msg) {
+    msg = msg.trim();                         // trim white space from front and back of string
+    msg = msg.replace(/[^\x00-\x7F]/g, '');   // Removes non-ASCII characters
+    if (msg.length == 0) {                    // No message to be sent
+      socket.emit("chat message", "SERVER", "No valid message was present, nothing was sent to this room.");
+      return null;
+    }
+    if (msg.length > 160) {                   // Error sending over 160 characters
+      socket.emit("chat message", "SERVER", "Only a maximum of 160 characters can be sent. Please try again.");
+      return null;
+    }
+    return msg;
+  }
 });
 
 http.listen(3000, () => {
