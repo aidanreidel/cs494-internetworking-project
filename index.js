@@ -11,7 +11,13 @@ app.get("/", (req, res) => {
 });
 
 const usernames = {};
-var rooms = ["room1", "room2", "room3"];
+let rooms = ["room1", "room2", "room3"];
+// Initialize the first chat room history
+let history = {
+  room1: [],
+  room2: [],
+  room3: []
+};
 
 io.on("connection", function(socket) {
   socket.on("adduser", username => {
@@ -20,18 +26,24 @@ io.on("connection", function(socket) {
     socket.room = "room1"; // store room name in the socket session for this client
     socket.join("room1"); // send client to room 1
     console.log(usernames);
+    socket.emit("update rooms", history[socket.room], rooms, socket.room);
     socket.emit("chat message", "SERVER", username + " joined room 1!"); // echo to client that that have joined
     socket.broadcast
       .to("room1") //Maybe list traversal here
       .emit("chat message", "SERVER", username + " has connected to this room");
     io.emit("update users", usernames); // This sends the user list over to the client
-    io.emit("update rooms", rooms, socket.room);
   });
 
   // Can a user be in more than one room at a time, but only see messages from one?
   // Lets find out!
   socket.on("chat message", function(msg) {
-    io.emit("chat message", socket.username, msg);
+    // Start a chat history if there isn't one
+    if (!history[socket.room]) history[socket.room] = [];
+    // Append this message into the specific room's chat history
+    history[socket.room].push(socket.username + ": " + msg);
+    console.log(history); // TODO: remove
+    //send the message to the room in question
+    io.in(socket.room).emit("chat message", socket.username, msg);
   });
 
   socket.on("change room", newroom => {
@@ -52,7 +64,7 @@ io.on("connection", function(socket) {
       );
     // Update room session info
     socket.room = newroom;
-    socket.emit("update rooms", rooms, newroom);
+    socket.emit("update rooms", history[newroom], rooms, newroom);
   });
 
   socket.on("disconnect", function() {

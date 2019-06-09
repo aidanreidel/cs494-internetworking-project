@@ -99,8 +99,15 @@
           m.value = "";
         });
 
+        socket.on("load msg history", history => {});
         //append a li for each room on the server
-        socket.on("update rooms", (roomList, room) => {
+        socket.on("update rooms", (history, roomList, room) => {
+          // First load this room's message history
+          removeChildren("messages");
+          history.forEach(msg => {
+            appendLi("messages", msg);
+          });
+          // Then update the room list
           removeChildren("room-list");
           roomList.forEach(element => {
             if (element === room) appendLi("room-list", element);
