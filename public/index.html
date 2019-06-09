@@ -24,13 +24,18 @@
         text-align: center;
         font-size: 25px;
       }
+      h3 {
+        font-size: 20px;
+      }
       .column {
-        width: 9%;
+        width: 14%;
         height: 90%;
         float: left;
+        padding-left: 8px;
+        padding-right: 8px;
       }
       .main {
-        width: 80%;
+        width: 70%;
         height: 90%;
         float: left;
       }
@@ -41,12 +46,82 @@
         float: right;
         display: inline-block;
       }*/
-      #userList {
+      #userList,
+      #room-list {
         width: inherit;
         list-style-type: none;
         padding: 5px;
       }
-      form {
+      #create-room-btn,
+      #remove-room-btn,
+      #join-room-btn {
+        width: 190px;
+        height: 40px;
+        font-size: 20px;
+        text-align: center;
+        color: black;
+        background-color: white;
+        margin: 4px auto;
+        padding: 4px;
+      }
+      #create-room,
+      #create-room-btn {
+        border: 3px solid #4caf50;
+      }
+      #join-room,
+      #join-room-btn {
+        border: 3px solid yellow;
+      }
+      #remove-room,
+      #remove-room-btn {
+        border: 3px solid purple;
+      }
+      #create-room,
+      #join-room,
+      #remove-room {
+        display: none;
+        width: 190px;
+        /* height: 190px; */
+        margin: 5px auto;
+      }
+      .form-popup h3 {
+        text-align: center;
+        padding-bottom: 2px;
+      }
+      .form-popup input[type="text"] {
+        width: 95%;
+        margin: 5px;
+        padding: 5px;
+        border: none;
+        background: #f1f1f1;
+      }
+      .form-popup input[type="text"]:focus {
+        background-color: #ddd;
+        outline: none;
+      }
+      .submit-btn,
+      .close-btn {
+        width: 98%;
+        height: 40px;
+        font-size: 20px;
+        text-align: center;
+        color: white;
+        margin: 1px 2px;
+        border: none;
+        cursor: pointer;
+        opacity: 0.8;
+      }
+      .submit-btn {
+        background-color: #4caf50;
+      }
+      .close-btn {
+        background-color: red;
+      }
+      .submit-btn:hover,
+      .close-btn:hover {
+        opacity: 1;
+      }
+      .message-box-form {
         background: #000;
         padding: 3px;
         position: fixed;
@@ -56,13 +131,14 @@
       #message-box {
         width: inherit;
       }
-      form input {
+      /*.message-box-form input[type=text] {*/
+      .message-box-form input {
         border: 0;
         padding: 10px;
         width: 90%;
         margin-right: 0.5%;
       }
-      form button {
+      .message-box-form button {
         width: 9%;
         background: rgb(130, 224, 255);
         border: none;
@@ -131,6 +207,29 @@
             appendLi("userList", element);
           });
         });
+
+        const roomList = document.getElementById("rooms");
+
+        socket.on("updateRooms", data => {
+          Object.values(data).forEach(element => {
+            let li = document.createElement("li");
+            // li.setAttribute('class', 'item')
+            userList.appendChild(li);
+            li.innerHTML = element;
+          });
+        });
+
+        socket.on("listAllRoomsForm", data => {
+          var roomList = document.getElementById("join-roomList");
+
+          Object.values(data).forEach(element => {
+            var radioHtml = '<input type="radio" name="rooms" value=';
+            radioHmtl += element;
+            //appendLi("userList", element);
+          });
+        });
+
+        socket.on("createRadioElement", data => {});
       });
 
       // Helper Functions
@@ -152,6 +251,31 @@
           myNode.removeChild(myNode.firstChild);
         }
       };
+
+      function openJoinForm() {
+        document.getElementById("join-room").style.display = "block";
+        document.getElementById("join-room-btn").style.display = "none";
+      }
+      function openCreateForm() {
+        document.getElementById("create-room").style.display = "block";
+        document.getElementById("create-room-btn").style.display = "none";
+      }
+      function openRemoveForm() {
+        document.getElementById("remove-room").style.display = "block";
+        document.getElementById("remove-room-btn").style.display = "none";
+      }
+      function closeJoinForm() {
+        document.getElementById("join-room-btn").style.display = "block";
+        document.getElementById("join-room").style.display = "none";
+      }
+      function closeCreateForm() {
+        document.getElementById("create-room-btn").style.display = "block";
+        document.getElementById("create-room").style.display = "none";
+      }
+      function closeRemoveForm() {
+        document.getElementById("remove-room-btn").style.display = "block";
+        document.getElementById("remove-room").style.display = "none";
+      }
     </script>
 
     <title>Socket.IO chat</title>
@@ -165,13 +289,69 @@
     <div class="column" id="menu">
       <h2>Rooms</h2>
       <ul id="room-list"></ul>
+
+      <button id="join-room-btn" onclick="openJoinForm()">
+        <b>Join Room</b>
+      </button>
+      <div class="form-popup">
+        <form class="join-room-form" id="join-room">
+          <h3>Join Room</h3>
+          <!--List Available Rooms-->
+          <div id="join-roomList"></div>
+
+          <input type="button" class="submit-btn" value="Submit" />
+          <input
+            type="button"
+            class="close-btn"
+            onclick="closeJoinForm()"
+            value="Cancel"
+          />
+        </form>
+      </div>
+
+      <button id="create-room-btn" onclick="openCreateForm()">
+        <b>Create Room</b>
+      </button>
+      <div class="form-popup">
+        <form class="create-room-form" id="create-room">
+          <h3>Create Room</h3>
+          <label for="roomName">Enter Room Name</label>
+          <input type="text" placeholder="Room Name" name="roomName" required />
+
+          <input type="button" class="submit-btn" value="Submit" />
+          <input
+            type="button"
+            class="close-btn"
+            onclick="closeCreateForm()"
+            value="Cancel"
+          />
+        </form>
+      </div>
+
+      <button id="remove-room-btn" onclick="openRemoveForm()">
+        <b>Remove Room</b>
+      </button>
+      <div class="form-popup">
+        <form class="remove-room" id="remove-room">
+          <h3>Remove Room</h3>
+          <!--List available rooms-->
+
+          <input type="button" class="submit-btn" value="Submit" />
+          <input
+            type="button"
+            class="close-btn"
+            onclick="closeRemoveForm()"
+            value="Cancel"
+          />
+        </form>
+      </div>
     </div>
 
     <div class="main">
       <h2>Messages</h2>
       <span><ul id="messages"></ul></span>
 
-      <form id="message-box" action="">
+      <form class="message-box-form" id="message-box" action="">
         <input id="m" autocomplete="off" /><button>Send</button>
       </form>
     </div>
@@ -182,7 +362,7 @@
     </div>
   </body>
 </html>
-<!-- Junkpile below, for upcoming reference 
+<!-- Junk Pile
 /*
 leaving this in as an example for now
 const users = document.getElementById("showUsers");
@@ -193,25 +373,4 @@ showUsers.addEventListener("click", e => {
   });
 });
 */
--->
-<!--
-      // socket.on("update rooms", (rooms, current_room) => {
-      //   $("#rooms").empty();
-      //   $.each(rooms, function(key, value) {
-      //     if (value == current_room) {
-      //       $("#rooms").append("<div>" + value + "</div>");
-      //     } else {
-      //       $("#rooms").append(
-      //         '<div><a href="#" onclick="switchRoom(\'' +
-      //           value +
-      //           "')\">" +
-      //           value +
-      //           "</a></div>"
-      //       );
-      //     }
-      //   });
-      // });
-      // function switchRoom(room) {
-      //   socket.emit("switch room", room);
-      // }
 -->
