@@ -83,7 +83,12 @@ io.on("connection", function(socket) {
           socket.username + " has connected to this room"
         );
       io.in(socket.room).emit("update users", usersInRoom(socket.room)); // Updates user list for the new room!
-      socket.emit("update rooms", history[socket.room], allRooms, socket.room);
+      socket.emit(
+        "update rooms",
+        history[socket.room],
+        usersRooms[socket.username],
+        socket.room
+      );
     } else {
       console.log(roomname + " already exists");
       socket.emit(
