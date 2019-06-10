@@ -129,13 +129,23 @@
       .close-btn:hover {
         opacity: 1;
       }
-      #room-list, #userList {
-        font-size: 15px;
-        padding: 10px;
-        padding-left: 15px;
+      .list ul {
+        padding-left: 10px;
       }
-      #room-list a:link {
+      .list li {
+        font-size: 15px;
+        padding-left: 15px;
         text-decoration: none;
+        list-style-type: none;
+      }
+      .list a:link {
+        text-decoration: none;
+        list-style-type: none;
+        color: blue;
+      }
+      .list a:visited {
+        text-decoration: none;
+        color: blue;
       }
       .message-box-form {
         background: #000;
@@ -308,6 +318,14 @@
           fn(confirm(info));
         });
 
+        socket.on("disconnect", function() {
+          alert("The server has been disconnected")
+        });
+
+        socket.on("connect_failed", function() {
+          alert("Uh oh! Looks like there's a problem with the connection")
+        });
+
         // TODO: determine if needed
         socket.on("createRadioElement", data => {});
       });
@@ -408,7 +426,7 @@
 
     <div class="column" id="menu">
       <h2>Rooms</h2>
-      <ul id="room-list"></ul>
+      <ul class="list" id="room-list"></ul>
 
       <!-- Join a room -->
       <button id="join-room-btn" onclick="openJoinForm()">
@@ -419,7 +437,7 @@
           <h3>Join Room</h3>
           Select a room to connect to!
           <!--List Available Rooms-->
-          <div id="join-roomList"></div>
+          <ul class="list" id="join-roomList"></ul>
 
           <input type="submit" id="submit-btn" value="Submit" />
           <input
@@ -440,7 +458,7 @@
           <h3>Leave Room</h3>
           Select the room you want to disconnect from
           <!--List available rooms-->
-          <ul id="leave-roomList"></ul>
+          <ul class="list" id="leave-roomList"></ul>
 
           <input type="submit" id="submit-btn" value="Submit" />
           <input
@@ -489,7 +507,7 @@
           Let's clear up rooms not needed! Select one that you want to remove
           from the server
           <!--List available rooms-->
-          <ul id="remove-roomList"></ul>
+          <ul class="list" id="remove-roomList"></ul>
 
           <input
             type="button"
@@ -516,7 +534,7 @@
 
     <div class="column" id="users">
       <h2>Online Users</h2>
-        <ul id="userList"></ul>
+        <ul class="list" id="userList"></ul>
     </div>
   </body>
 </html>
