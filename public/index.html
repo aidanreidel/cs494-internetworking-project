@@ -249,18 +249,6 @@
           });
 
         document
-          .getElementById("remove-room-btn")
-          .addEventListener("click", e => {
-            e.preventDefault();
-            socket.emit("get all rooms", allRooms => {
-              removeChildren("remove-roomList");
-              allRooms.forEach(element => {
-                appendLi("remove-roomList", makeHrefFn("removeRoom", element));
-              });
-            });
-          });
-
-        document
           .getElementById("leave-room-btn")
           .addEventListener("click", e => {
             e.preventDefault();
@@ -309,16 +297,6 @@
           });
         });
 
-        socket.on("listAllRoomsForm", data => {
-          var roomList = document.getElementById("join-roomList");
-
-          Object.values(data).forEach(element => {
-            var radioHtml = '<input type="radio" name="rooms" value=';
-            radioHmtl += element;
-            //appendLi("userList", element);
-          });
-        });
-
         socket.on("confirm", (info, fn) => {
           fn(confirm(info));
         });
@@ -330,9 +308,6 @@
         socket.on("connect_failed", function() {
           alert("Uh oh! Looks like there's a problem with the connection");
         });
-
-        // TODO: determine if needed
-        socket.on("createRadioElement", data => {});
       });
 
       // Helper Functions
@@ -397,13 +372,6 @@
         closeJoinForm();
         closeRemoveForm();
       }
-      function openRemoveForm() {
-        document.getElementById("remove-room").style.display = "block";
-        document.getElementById("remove-room-btn").style.display = "none";
-        closeLeaveForm();
-        closeCreateForm();
-        closeJoinForm();
-      }
       function closeJoinForm() {
         document.getElementById("join-room-btn").style.display = "block";
         document.getElementById("join-room").style.display = "none";
@@ -415,10 +383,6 @@
       function closeCreateForm() {
         document.getElementById("create-room-btn").style.display = "block";
         document.getElementById("create-room").style.display = "none";
-      }
-      function closeRemoveForm() {
-        document.getElementById("remove-room-btn").style.display = "block";
-        document.getElementById("remove-room").style.display = "none";
       }
     </script>
 
@@ -500,27 +464,6 @@
           />
         </form>
       </div>
-
-      <!-- Delete a room so no users can join -->
-      <button id="remove-room-btn" onclick="openRemoveForm()">
-        <b>Remove Room</b>
-      </button>
-      <div class="form-popup">
-        <form class="remove-room" id="remove-room">
-          <h3>Remove Room</h3>
-          Let's clear up rooms not needed! Select one that you want to remove
-          from the server
-          <!--List available rooms-->
-          <ul class="list" id="remove-roomList"></ul>
-
-          <input
-            type="button"
-            class="close-btn"
-            onclick="closeRemoveForm()"
-            value="Cancel"
-          />
-        </form>
-      </div>
     </div>
 
     <div class="main">
@@ -542,16 +485,3 @@
     </div>
   </body>
 </html>
-
-<!-- Junk Pile
-/*
-leaving this in as an example for now
-const users = document.getElementById("showUsers");
-showUsers.addEventListener("click", e => {
-  e.preventDefault();
-  socket.emit("getUsers", data => {
-    alert("Online Users:\n" + joinData(data));
-  });
-});
-*/
--->

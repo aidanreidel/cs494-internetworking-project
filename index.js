@@ -136,11 +136,7 @@ io.on("connection", function(socket) {
     callback();
   });
 
-  // Allows the client access to the global room list
-  socket.on("get all rooms", fn => {
-    fn(allRooms);
-  });
-
+  // Send the client their rooms list
   socket.on("get rooms", fn => {
     fn(usersRooms[socket.username]);
   });
@@ -148,16 +144,6 @@ io.on("connection", function(socket) {
   // Show rooms that a user has not joined by subtracting the arrays
   socket.on("get other rooms", fn => {
     fn(allRooms.filter(x => !usersRooms[socket.username].includes(x)));
-  });
-  // Removes a room from the global room list
-  socket.on("remove room", room => {
-    console.log(room);
-    // TODO: deal with populated rooms, maybe move all clients to home
-    socket.emit("confirm", "Remove the room: " + room + "?", confirmed => {
-      if (confirmed) console.log("Needs to be implemented!!");
-    });
-
-    io.in(room).emit("update users", usersInRoom(room)); // Update connected users for specified room
   });
 
   // Can a user be in more than one room at a time, but only see messages from one?
