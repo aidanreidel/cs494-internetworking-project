@@ -125,7 +125,7 @@ io.on("connection", function(socket) {
         "SERVER",
         socket.username + " has connected to this room"
       );
-    io.emit("update users-all", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
+    io.in(socket.room).emit("update users", usersInRoom(socket.room)); // Updates user list for the new room!
     //io.emit("update users-room", usernames);
     socket.emit(
       "update rooms",
@@ -294,13 +294,13 @@ io.on("connection", function(socket) {
     return msg;
   }
 
-  io.on('connect_failed', function() {
+  io.on("connect_failed", function() {
     alert("Sorry, there seems to be an issue with the connection!");
     document.write("Sorry, there seems to be an issue with the connection!");
   });
 });
 
-io.on('connect_failed', function() {
+io.on("connect_failed", function() {
   alert("Sorry, there seems to be an issue with the connection!");
   document.write("Sorry, there seems to be an issue with the connection!");
 });
