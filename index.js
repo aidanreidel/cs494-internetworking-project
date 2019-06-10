@@ -82,7 +82,6 @@ io.on("connection", function(socket) {
           "SERVER",
           socket.username + " has connected to this room"
         );
-<<<<<<< Updated upstream
       io.in(socket.room).emit("update users", usersInRoom(socket.room)); // Updates user list for the new room!
       socket.emit(
         "update rooms",
@@ -90,10 +89,6 @@ io.on("connection", function(socket) {
         usersRooms[socket.username],
         socket.room
       );
-=======
-      io.in(socket.room).emit("update users", usersInRoom(socket.room));  // Updates user list for the new room!
-      socket.emit("update rooms", history[socket.room], usersRooms[socket.username], socket.room);
->>>>>>> Stashed changes
     } else {
       console.log(roomname + " already exists");
       socket.emit(
