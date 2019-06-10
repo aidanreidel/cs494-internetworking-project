@@ -251,20 +251,10 @@
         });
 
         //append a li for each user in on the server
-        socket.on("update users-all", data => {
+        socket.on("update users", data => {
           removeChildren("userList");
           Object.values(data).forEach(element => {
             appendLi("userList", element);
-          });
-        });
-
-        // >> NOT YET IMPLEMENTED IN index.js
-        // >> No function should call this just yet.
-        // append a li for each user connected to the current room.
-        socket.on("update users-room", data => {
-          removeChildren("userRoomList");
-          Object.values(data).forEach(element => {
-            appendLi("roomUserList", element);
           });
         });
 
@@ -496,19 +486,11 @@
 
     <div class="column" id="users">
       <h2>Online Users</h2>
-
-      <!-- <div id="roomUsers">
-        <h3>Connected to Room</h3>
-        <ul id="roomUserList"></ul>
-      </div> -->
-
-      <div id="allUsers">
-        <!-- <h3>All Users</h3> -->
         <ul id="userList"></ul>
-      </div>
     </div>
   </body>
 </html>
+
 <!-- Junk Pile
 /*
 leaving this in as an example for now

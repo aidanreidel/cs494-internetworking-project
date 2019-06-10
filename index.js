@@ -53,8 +53,7 @@ io.on("connection", function(socket) {
     socket.broadcast
       .to("Home") //Maybe list traversal here
       .emit("chat message", "SERVER", username + " has connected to this room");
-    io.emit("update users-all", usernames); // This sends the user list over to the client
-    //io.emit("update users-room", usernames);
+    io.in(socket.room).emit("update users", usersInRoom(socket.room));  // Updates user list for Home
   });
 
   socket.on("addroom", roomname => {
@@ -65,7 +64,7 @@ io.on("connection", function(socket) {
       history[roomname] = [];
 
       // Change room into new room
-      //socket.leave(socket.room);
+      socket.leave(socket.room);
       socket.room = roomname; // store room name in the socket session for this client
       socket.join(roomname); // send client to new room
       console.log("All rooms: " + allRooms); // log all rooms to console
@@ -83,8 +82,7 @@ io.on("connection", function(socket) {
           "SERVER",
           socket.username + " has connected to this room"
         );
-      io.emit("update users-all", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
-      //io.emit("update users-room", usernames);
+      io.in(socket.room).emit("update users", usersInRoom(socket.room));  // Updates user list for the new room!
       socket.emit("update rooms", history[socket.room], allRooms, socket.room);
     } else {
       console.log(roomname + " already exists");
@@ -100,6 +98,7 @@ io.on("connection", function(socket) {
   socket.on("get all rooms", fn => {
     fn(allRooms);
   });
+
   // Removes a room from the global room list
   socket.on("remove room", room => {
     console.log(room);
@@ -107,6 +106,8 @@ io.on("connection", function(socket) {
     socket.emit("confirm", "Remove the room: " + room + "?", confirmed => {
       if (confirmed) console.log("Needs to be implemented!!");
     });
+
+    io.in(room).emit("update users", usersInRoom(room));  // Update connected users for specified room
   });
 
   // Can a user be in more than one room at a time, but only see messages from one?
@@ -142,29 +143,15 @@ io.on("connection", function(socket) {
   socket.on("change room", newroom => {
     socket.leave(socket.room);
     socket.join(newroom);
-    // >>> Dont think its necessary to print messages when changing rooms anymore
-    // Alert user they changed rooms
-    // socket.emit("chat message", "SERVER", "you have connected to " + newroom);
-    // Alert rooms you left / joined
-    // socket.broadcast
-    //   .to(socket.room)
-    //   .emit("chat message", "SERVER", socket.username + " has left this room");
-    // socket.broadcast
-    //   .to(newroom)
-    //   .emit(
-    //     "chat message",
-    //     "SERVER",
-    //     socket.username + " has joined this room"
-    //   );
     // Update room session info
     socket.room = newroom;
     socket.emit("update rooms", history[newroom], allRooms, newroom);
-    io.emit("update users-all", usernames);
-    //io.emit("update users-room", usernames);
+    io.in(newroom).emit("update users", usersInRoom(newroom));  // Updates the users list for the new room
   });
 
   socket.on("disconnect", function() {
     if (typeof socket.username === "undefined") return;
+
     socket.broadcast.emit(
       "chat message",
       "SERVER",
@@ -172,11 +159,39 @@ io.on("connection", function(socket) {
     ); // echo globally that this client has left
     socket.leave(socket.room);
     console.log(socket.username + " disconnected");
+
+    // Makes a deep copy of the rooms the user was connected to so user lists
+    // of those rooms can be updated
+    var rooms = [];
+    Object.values(usersRooms[socket.username]).forEach(room => {
+      rooms.push(room);
+    });
+
+    // Deletes the users memory from data structures
     delete usernames[socket.username];
-    io.sockets.emit("update users-all", usernames); // update list of users in chat, client-side
-    //io.sockets.emit("update users-room", usernames);
+    delete usersRooms[socket.username];
+
+    // Updates the user list to all of the rooms the user was connected to
+    rooms.forEach(room => {
+      io.in(room).emit("update users", usersInRoom(room)); 
+    });
+
     console.log(usernames);
+    console.log(usersRooms);
   });
+
+  // Helper functions
+
+  function usersInRoom(room) {
+    var users = [];
+    for (var username in usersRooms) {
+      if (usersRooms[username].includes(room)) {
+        users.push(username);
+      }
+    }
+    console.log(users);
+    return users;
+  }
 
   function validateMsg(msg) {
     msg = msg.trim(); // trim white space from front and back of string
