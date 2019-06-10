@@ -66,14 +66,7 @@ io.on("connection", function(socket) {
         "chat message",
         "SERVER",
         socket.username + " joined " + roomname + "!! Welcome in!"
-      ); // echo to client that that have joined
-      socket.broadcast
-        .to(roomname)
-        .emit(
-          "chat message",
-          "SERVER",
-          socket.username + " has connected to this room"
-        );
+      );
       socket.emit(
         "update rooms",
         history[socket.room],
@@ -112,7 +105,6 @@ io.on("connection", function(socket) {
         socket.username + " has connected to this room"
       );
     io.in(socket.room).emit("update users", usersInRoom(socket.room)); // Updates user list for the new room!
-    //io.emit("update users-room", usernames);
     socket.emit(
       "update rooms",
       history[socket.room],
@@ -187,6 +179,7 @@ io.on("connection", function(socket) {
       socket.join("Home");
       // Update room session info
       socket.room = "Home";
+      io.in("Home").emit("update users", usersInRoom("Home")); // Updates the users list for the new room
     }
     socket.emit(
       "update rooms",
@@ -194,7 +187,6 @@ io.on("connection", function(socket) {
       usersRooms[socket.username],
       socket.room
     );
-    io.in(room).emit("update users", usersInRoom(room)); // Updates the users list for the new room
     callback();
   });
 
