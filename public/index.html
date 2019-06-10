@@ -286,21 +286,6 @@
           });
         });
 
-        const roomList = document.getElementById("rooms");
-
-        socket.on("updateRooms", data => {
-          Object.values(data).forEach(element => {
-            let li = document.createElement("li");
-            // li.setAttribute('class', 'item')
-            userList.appendChild(li);
-            li.innerHTML = element;
-          });
-        });
-
-        socket.on("confirm", (info, fn) => {
-          fn(confirm(info));
-        });
-
         socket.on("disconnect", function() {
           alert("The server has been disconnected");
         });
