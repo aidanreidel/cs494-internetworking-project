@@ -261,6 +261,19 @@
             });
           });
 
+        document
+          .getElementById("leave-room-btn")
+          .addEventListener("click", e => {
+            e.preventDefault();
+            socket.emit("get rooms", joinedRooms => {
+              removeChildren("leave-roomList");
+              joinedRooms.forEach(element => {
+                if (!(element === "Home"))
+                  appendLi("leave-roomList", makeHrefFn("leaveRoom", element));
+              });
+            });
+          });
+
         document.getElementById("remove-room").addEventListener("submit", e => {
           e.preventDefault();
           // remove selected room
@@ -319,11 +332,11 @@
         });
 
         socket.on("disconnect", function() {
-          alert("The server has been disconnected")
+          alert("The server has been disconnected");
         });
 
         socket.on("connect_failed", function() {
-          alert("Uh oh! Looks like there's a problem with the connection")
+          alert("Uh oh! Looks like there's a problem with the connection");
         });
 
         // TODO: determine if needed
@@ -346,9 +359,10 @@
       const removeRoom = room => socket.emit("remove room", room);
 
       const joinRoom = room =>
-        socket.emit("join room", room, () => {
-          closeJoinForm();
-        });
+        socket.emit("join room", room, () => closeJoinForm());
+
+      const leaveRoom = room =>
+        socket.emit("leave room", room, () => closeLeaveForm());
 
       // Extension for appendLi
       const makeHrefFn = (fn, element) => {
@@ -439,7 +453,6 @@
           <!--List Available Rooms-->
           <ul class="list" id="join-roomList"></ul>
 
-          <input type="submit" id="submit-btn" value="Submit" />
           <input
             type="button"
             class="close-btn"
@@ -460,7 +473,6 @@
           <!--List available rooms-->
           <ul class="list" id="leave-roomList"></ul>
 
-          <input type="submit" id="submit-btn" value="Submit" />
           <input
             type="button"
             class="close-btn"
@@ -534,7 +546,7 @@
 
     <div class="column" id="users">
       <h2>Online Users</h2>
-        <ul class="list" id="userList"></ul>
+      <ul class="list" id="userList"></ul>
     </div>
   </body>
 </html>
