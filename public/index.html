@@ -252,6 +252,19 @@
             });
           });
 
+        document
+          .getElementById("leave-room-btn")
+          .addEventListener("click", e => {
+            e.preventDefault();
+            socket.emit("get rooms", joinedRooms => {
+              removeChildren("leave-roomList");
+              joinedRooms.forEach(element => {
+                if (!(element === "Home"))
+                  appendLi("leave-roomList", makeHrefFn("leaveRoom", element));
+              });
+            });
+          });
+
         document.getElementById("remove-room").addEventListener("submit", e => {
           e.preventDefault();
           // remove selected room
@@ -329,9 +342,10 @@
       const removeRoom = room => socket.emit("remove room", room);
 
       const joinRoom = room =>
-        socket.emit("join room", room, () => {
-          closeJoinForm();
-        });
+        socket.emit("join room", room, () => closeJoinForm());
+
+      const leaveRoom = room =>
+        socket.emit("leave room", room, () => closeLeaveForm());
 
       // Extension for appendLi
       const makeHrefFn = (fn, element) => {

@@ -141,6 +141,10 @@ io.on("connection", function(socket) {
     fn(allRooms);
   });
 
+  socket.on("get rooms", fn => {
+    fn(usersRooms[socket.username]);
+  });
+
   // Show rooms that a user has not joined by subtracting the arrays
   socket.on("get other rooms", fn => {
     fn(allRooms.filter(x => !usersRooms[socket.username].includes(x)));
@@ -198,6 +202,28 @@ io.on("connection", function(socket) {
       socket.room
     );
     io.in(newroom).emit("update users", usersInRoom(newroom)); // Updates the users list for the new room
+  });
+
+  socket.on("leave room", (room, callback) => {
+    // TODO: add notifications to the user?
+    const index = usersRooms[socket.username].indexOf(room);
+    if (index > -1) {
+      usersRooms[socket.username].splice(index, 1);
+    }
+    if (room === socket.room) {
+      socket.leave(socket.room);
+      socket.join("Home");
+      // Update room session info
+      socket.room = "Home";
+    }
+    socket.emit(
+      "update rooms",
+      history[socket.room],
+      usersRooms[socket.username],
+      socket.room
+    );
+    io.in(room).emit("update users", usersInRoom(room)); // Updates the users list for the new room
+    callback();
   });
 
   socket.on("disconnect", function() {
