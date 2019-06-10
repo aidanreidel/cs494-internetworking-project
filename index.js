@@ -11,13 +11,14 @@ app.get("/", (req, res) => {
 });
 
 const usernames = {};
-let allRooms = ["Home"];    // List of all rooms available
-let history = {             // Initialize the first chat room history
+let allRooms = ["Home"]; // List of all rooms available
+let history = {
+  // Initialize the first chat room history
   Home: []
 };
 
 io.on("connection", function(socket) {
-  let yourRooms = ["Home"];   // List of user's rooms available
+  let yourRooms = ["Home"]; // List of user's rooms available
 
   socket.on("adduser", username => {
     usernames[username] = username;
@@ -34,39 +35,74 @@ io.on("connection", function(socket) {
   });
 
   socket.on("addroom", roomname => {
-    if (!allRooms.includes(roomname)){
-      allRooms.push(roomname);  // add room to global room list
+    if (!allRooms.includes(roomname)) {
+      allRooms.push(roomname); // add room to global room list
       yourRooms.push(roomname); // add room to your connected rooms
-      socket.room = roomname;   // store room name in the socket session for this client
-      socket.join(roomname);    // send client to new room
-      console.log(allRooms);    // log all rooms to console
+      socket.room = roomname; // store room name in the socket session for this client
+      socket.join(roomname); // send client to new room
+      console.log(allRooms); // log all rooms to console
       console.log(yourRooms);
       history[roomname] = [];
 
-      socket.emit("chat message", "SERVER", socket.username + " joined " + roomname + "!! Welcome in!"); // echo to client that that have joined
-      socket.broadcast.to(roomname) //Maybe list traversal here
-        .emit("chat message", "SERVER", socket.username + " has connected to this room");
+      socket.emit(
+        "chat message",
+        "SERVER",
+        socket.username + " joined " + roomname + "!! Welcome in!"
+      ); // echo to client that that have joined
+      socket.broadcast
+        .to(roomname) //Maybe list traversal here
+        .emit(
+          "chat message",
+          "SERVER",
+          socket.username + " has connected to this room"
+        );
       io.emit("update users", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
       socket.emit("update rooms", history[socket.room], allRooms, socket.room);
-    }
-    else {
+    } else {
       console.log(roomname + " already exists");
-      socket.emit("chat message", "SERVER", roomname + " already exists. Try another one or join that room!");
+      socket.emit(
+        "chat message",
+        "SERVER",
+        roomname + " already exists. Try another one or join that room!"
+      );
     }
+  });
+
+  // Allows the client access to the global room list
+  socket.on("get all rooms", fn => {
+    fn(allRooms);
+  });
+  // Removes a room from the global room list
+  socket.on("remove room", room => {
+    console.log(room);
+    // TODO: deal with populated rooms, maybe move all clients to home
+    socket.emit("confirm", "Remove the room: " + room + "?", confirmed => {
+      if (confirmed) console.log("Needs to be implemented!!");
+    });
   });
 
   // Can a user be in more than one room at a time, but only see messages from one?
   // Lets find out!
   socket.on("chat message", function(msg) {
     // Checks message information
-    msg = msg.trim();                         // trim white space from front and back of string
-    msg = msg.replace(/[^\x00-\x7F]/g, '');   // Removes non-ASCII characters
-    if (msg.length == 0) {                    // No message to be sent
-      socket.emit("chat message", "SERVER", "No valid message was present, nothing was sent to this room.");
+    msg = msg.trim(); // trim white space from front and back of string
+    msg = msg.replace(/[^\x00-\x7F]/g, ""); // Removes non-ASCII characters
+    if (msg.length == 0) {
+      // No message to be sent
+      socket.emit(
+        "chat message",
+        "SERVER",
+        "No valid message was present, nothing was sent to this room."
+      );
       return;
     }
-    if (msg.length > 160) {                   // Error sending over 160 characters
-      socket.emit("chat message", "SERVER", "Only a maximum of 160 characters can be sent. Please try again.");
+    if (msg.length > 160) {
+      // Error sending over 160 characters
+      socket.emit(
+        "chat message",
+        "SERVER",
+        "Only a maximum of 160 characters can be sent. Please try again."
+      );
       return;
     }
     // Start a chat history if there isn't one
