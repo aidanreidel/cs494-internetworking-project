@@ -299,6 +299,12 @@
 
       const changeRoom = room => socket.emit("change room", room);
 
+      const joinRoom = room =>
+        socket.emit("join room", room, () => closeJoinForm());
+
+      const leaveRoom = room =>
+        socket.emit("leave room", room, () => closeLeaveForm());
+ 
       // Appends an li to a given list element
       const appendLi = (list, innerHTML) => {
         const l = document.getElementById(list);
@@ -308,15 +314,7 @@
         li.innerHTML = innerHTML;
       };
 
-      const removeRoom = room => socket.emit("remove room", room);
-
-      const joinRoom = room =>
-        socket.emit("join room", room, () => closeJoinForm());
-
-      const leaveRoom = room =>
-        socket.emit("leave room", room, () => closeLeaveForm());
-
-      // Extension for appendLi
+     // Extension for appendLi
       const makeHrefFn = (fn, element) => {
         return (
           '<a href="#" onclick="' +
