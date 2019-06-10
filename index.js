@@ -11,12 +11,13 @@ app.get("/", (req, res) => {
 });
 
 const usernames = {};
-let allRooms = ["Home"];    // List of all rooms available
-let history = {             // Initialize the first chat room history
+let allRooms = ["Home"]; // List of all rooms available
+let history = {
+  // Initialize the first chat room history
   Home: []
 };
-let usersRooms = {};        // Structure to hold every user's list of connected rooms
-                            // {username: [list of rooms]}
+let usersRooms = {}; // Structure to hold every user's list of connected rooms
+// {username: [list of rooms]}
 
 io.on("connection", function(socket) {
   // Calls this function upon connecting to the server
@@ -38,15 +39,15 @@ io.on("connection", function(socket) {
     }*/
 
     socket.username = username;
-    socket.room = "Home";           // store room name in the socket session for this client
-    socket.join("Home");            // send client to the home room
-    console.log(usernames);
+    socket.room = "Home"; // store room name in the socket session for this client
+    socket.join("Home"); // send client to the home room
 
     // Add data to all of the structures
     usernames[username] = username;
-    usersRooms[username] = []          // Initilize room list for new user
+    usersRooms[username] = []; // Initilize room list for new user
     usersRooms[username].push("Home"); // add room to the user's connected rooms
-    
+
+    console.log(usersRooms);
     socket.emit("update rooms", history[socket.room], allRooms, socket.room);
     socket.emit("chat message", "SERVER", username + " joined the Home Room!"); // echo to client that that have joined
     socket.broadcast
@@ -57,29 +58,41 @@ io.on("connection", function(socket) {
   });
 
   socket.on("addroom", roomname => {
-    if (!allRooms.includes(roomname)){
+    if (!allRooms.includes(roomname)) {
       // Update data structures
-      allRooms.push(roomname);  // add room to global room list
+      allRooms.push(roomname); // add room to global room list
       usersRooms[socket.username].push(roomname); // add room to the user's connected rooms
       history[roomname] = [];
 
       // Change room into new room
       //socket.leave(socket.room);
-      socket.room = roomname;   // store room name in the socket session for this client
-      socket.join(roomname);    // send client to new room
-      console.log("All rooms: " + allRooms);    // log all rooms to console
+      socket.room = roomname; // store room name in the socket session for this client
+      socket.join(roomname); // send client to new room
+      console.log("All rooms: " + allRooms); // log all rooms to console
       console.log(socket.username + " rooms: " + usersRooms[socket.username]);
-            
-      socket.emit("chat message", "SERVER", socket.username + " joined " + roomname + "!! Welcome in!"); // echo to client that that have joined
-      socket.broadcast.to(roomname) //Maybe list traversal here
-        .emit("chat message", "SERVER", socket.username + " has connected to this room");
+
+      socket.emit(
+        "chat message",
+        "SERVER",
+        socket.username + " joined " + roomname + "!! Welcome in!"
+      ); // echo to client that that have joined
+      socket.broadcast
+        .to(roomname) //Maybe list traversal here
+        .emit(
+          "chat message",
+          "SERVER",
+          socket.username + " has connected to this room"
+        );
       io.emit("update users-all", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
       //io.emit("update users-room", usernames);
       socket.emit("update rooms", history[socket.room], allRooms, socket.room);
-    }
-    else {
+    } else {
       console.log(roomname + " already exists");
-      socket.emit("chat message", "SERVER", roomname + " already exists. Try another one or join that room!");
+      socket.emit(
+        "chat message",
+        "SERVER",
+        roomname + " already exists. Try another one or join that room!"
+      );
     }
   });
 
@@ -99,7 +112,7 @@ io.on("connection", function(socket) {
   });
 
   socket.on("chat message-all", function(msg) {
-    msg = validateMsg(msg);       // Validates the message given
+    msg = validateMsg(msg); // Validates the message given
     if (msg == null) return;
 
     // Sends message to each room the user is connected to
@@ -153,14 +166,24 @@ io.on("connection", function(socket) {
   });
 
   function validateMsg(msg) {
-    msg = msg.trim();                         // trim white space from front and back of string
-    msg = msg.replace(/[^\x00-\x7F]/g, '');   // Removes non-ASCII characters
-    if (msg.length == 0) {                    // No message to be sent
-      socket.emit("chat message", "SERVER", "No valid message was present, nothing was sent to this room.");
+    msg = msg.trim(); // trim white space from front and back of string
+    msg = msg.replace(/[^\x00-\x7F]/g, ""); // Removes non-ASCII characters
+    if (msg.length == 0) {
+      // No message to be sent
+      socket.emit(
+        "chat message",
+        "SERVER",
+        "No valid message was present, nothing was sent to this room."
+      );
       return null;
     }
-    if (msg.length > 160) {                   // Error sending over 160 characters
-      socket.emit("chat message", "SERVER", "Only a maximum of 160 characters can be sent. Please try again.");
+    if (msg.length > 160) {
+      // Error sending over 160 characters
+      socket.emit(
+        "chat message",
+        "SERVER",
+        "Only a maximum of 160 characters can be sent. Please try again."
+      );
       return null;
     }
     return msg;
@@ -176,9 +199,6 @@ http.listen(3000, () => {
     fn(usernames);
   });
   */
-
-
-
 
 /* Notes on functions... to keep my head clear!
 
