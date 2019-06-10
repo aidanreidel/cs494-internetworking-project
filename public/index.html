@@ -194,33 +194,34 @@
     </style>
 
     <script>
-      const joinData = data => Object.values(data).join("\n");
+      // This automatically sets up the socket connection between the client and server
       const socket = io();
 
       socket.on("connect", () => {
+        // Once the connection is setup, prompt the user for their name
         socket.emit("adduser", prompt("What's your name?"));
 
         const messages = document.getElementById("messages");
         socket.on("chat message", (username, msg) => {
           console.log(username + ": " + msg);
+          // Append a li to the message list
           appendLi("messages", username + ": " + msg);
         });
 
-        // document.getElementById("message-box").addEventListener("submit", e => {
         document.getElementById("send").addEventListener("click", e => {
           e.preventDefault();
+          // M is the message box text entry field
           const m = document.getElementById("m");
           socket.emit("chat message", m.value);
           m.value = "";
-          console.log("Send message to " + socket.room);
         });
 
         document.getElementById("send-all").addEventListener("click", e => {
           e.preventDefault();
           const m = document.getElementById("m");
+          // This sends a brodcast
           socket.emit("chat message-all", m.value);
           m.value = "";
-          console.log("Send message to " + usersRooms[socket.username]);
         });
 
         document.getElementById("create-room").addEventListener("submit", e => {
@@ -251,8 +252,6 @@
           .getElementById("remove-room-btn")
           .addEventListener("click", e => {
             e.preventDefault();
-            // list rooms from array into radio options
-            // append dynamically
             socket.emit("get all rooms", allRooms => {
               removeChildren("remove-roomList");
               allRooms.forEach(element => {
@@ -273,13 +272,6 @@
               });
             });
           });
-
-        document.getElementById("remove-room").addEventListener("submit", e => {
-          e.preventDefault();
-          // remove selected room
-          socket.emit("Roomlist", room);
-          // clear selected item?? close box?? update dynamic list??
-        });
 
         //append a li for each room on the server
         socket.on("update rooms", (history, roomList, room) => {
