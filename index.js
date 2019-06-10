@@ -20,26 +20,11 @@ let usersRooms = {}; // Structure to hold every user's list of connected rooms
 // {username: [list of rooms]}
 
 io.on("connection", function(socket) {
-  // Calls this function upon connecting to the server
+  // Calls this function upon connecting to the client
   socket.on("adduser", username => {
-    /* Trying to add a check for usernames.. currently doesnt work lol
-    while (!(username) || isInvalid(username)) {
-      username = prompt("What's your name?")
-    }
-
-    function isInvalid(name) {
-      name = name.trim();                         // trim white space from front and back of string
-      name = name.replace(/[^\x00-\x7F]/g, '');
-      if (name == '') return True;
-      if (username[name] != undefined) {
-        alert(name + " is already being used on this server. Please select another.");
-        return true;
-      }
-      return false;
-    }*/
-
+    // Save the clients username and what room they are in to a session variable
     socket.username = username;
-    socket.room = "Home"; // store room name in the socket session for this client
+    socket.room = "Home"; // This is the room everyone starts in
     socket.join("Home"); // send client to the home room
 
     // Add data to all of the structures
@@ -75,19 +60,20 @@ io.on("connection", function(socket) {
       console.log("All rooms: " + allRooms); // log all rooms to console
       console.log(socket.username + " rooms: " + usersRooms[socket.username]);
 
+      // Updates user list for the new room!
+      io.in(socket.room).emit("update users", usersInRoom(socket.room));
       socket.emit(
         "chat message",
         "SERVER",
         socket.username + " joined " + roomname + "!! Welcome in!"
       ); // echo to client that that have joined
       socket.broadcast
-        .to(roomname) //Maybe list traversal here
+        .to(roomname)
         .emit(
           "chat message",
           "SERVER",
           socket.username + " has connected to this room"
         );
-      io.in(socket.room).emit("update users", usersInRoom(socket.room)); // Updates user list for the new room!
       socket.emit(
         "update rooms",
         history[socket.room],
