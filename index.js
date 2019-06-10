@@ -15,38 +15,66 @@ let allRooms = ["Home"];    // List of all rooms available
 let history = {             // Initialize the first chat room history
   Home: []
 };
+let usersRooms = {};        // Structure to hold every user's list of connected rooms
+                            // {username: [list of rooms]}
 
 io.on("connection", function(socket) {
-  let yourRooms = ["Home"];   // List of user's rooms available
-
+  // Calls this function upon connecting to the server
   socket.on("adduser", username => {
-    usernames[username] = username;
+    /* Trying to add a check for usernames.. currently doesnt work lol
+    while (!(username) || isInvalid(username)) {
+      username = prompt("What's your name?")
+    }
+
+    function isInvalid(name) {
+      name = name.trim();                         // trim white space from front and back of string
+      name = name.replace(/[^\x00-\x7F]/g, '');
+      if (name == '') return True;
+      if (username[name] != undefined) {
+        alert(name + " is already being used on this server. Please select another.");
+        return true;
+      }
+      return false;
+    }*/
+
     socket.username = username;
-    socket.room = "Home"; // store room name in the socket session for this client
-    socket.join("Home"); // send client to room 1
+    socket.room = "Home";           // store room name in the socket session for this client
+    socket.join("Home");            // send client to the home room
     console.log(usernames);
+
+    // Add data to all of the structures
+    usernames[username] = username;
+    usersRooms[username] = []          // Initilize room list for new user
+    usersRooms[username].push("Home"); // add room to the user's connected rooms
+    
     socket.emit("update rooms", history[socket.room], allRooms, socket.room);
     socket.emit("chat message", "SERVER", username + " joined the Home Room!"); // echo to client that that have joined
     socket.broadcast
       .to("Home") //Maybe list traversal here
       .emit("chat message", "SERVER", username + " has connected to this room");
-    io.emit("update users", usernames); // This sends the user list over to the client
+    io.emit("update users-all", usernames); // This sends the user list over to the client
+    //io.emit("update users-room", usernames);
   });
 
   socket.on("addroom", roomname => {
     if (!allRooms.includes(roomname)){
+      // Update data structures
       allRooms.push(roomname);  // add room to global room list
-      yourRooms.push(roomname); // add room to your connected rooms
-      socket.room = roomname;   // store room name in the socket session for this client
-      socket.join(roomname);    // send client to new room
-      console.log(allRooms);    // log all rooms to console
-      console.log(yourRooms);
+      usersRooms[socket.username].push(roomname); // add room to the user's connected rooms
       history[roomname] = [];
 
+      // Change room into new room
+      //socket.leave(socket.room);
+      socket.room = roomname;   // store room name in the socket session for this client
+      socket.join(roomname);    // send client to new room
+      console.log("All rooms: " + allRooms);    // log all rooms to console
+      console.log(socket.username + " rooms: " + usersRooms[socket.username]);
+            
       socket.emit("chat message", "SERVER", socket.username + " joined " + roomname + "!! Welcome in!"); // echo to client that that have joined
       socket.broadcast.to(roomname) //Maybe list traversal here
         .emit("chat message", "SERVER", socket.username + " has connected to this room");
-      io.emit("update users", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
+      io.emit("update users-all", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
+      //io.emit("update users-room", usernames);
       socket.emit("update rooms", history[socket.room], allRooms, socket.room);
     }
     else {
@@ -74,34 +102,39 @@ io.on("connection", function(socket) {
     msg = validateMsg(msg);       // Validates the message given
     if (msg == null) return;
 
-    // Sends message to each room in allRooms (Currently)
-    allRooms.forEach(function(element) {
-      if (!history[element]) history[element] = [];
-      history[element].push(socket.username + ": " + msg);
-      console.log(history[element]);
-      io.in(element).emit("chat message", socket.username, msg);
+    // Sends message to each room the user is connected to
+    //usersRooms[socket.username].forEach(function(room) {
+    // Currently send message to ALL rooms... the correct code is commented out above
+    allRooms.forEach(function(room) {
+      if (!history[room]) history[room] = [];
+      history[room].push(socket.username + ": " + msg);
+      console.log(history);
+      io.in(room).emit("chat message", socket.username, msg);
     });
   });
 
   socket.on("change room", newroom => {
     socket.leave(socket.room);
     socket.join(newroom);
+    // >>> Dont think its necessary to print messages when changing rooms anymore
     // Alert user they changed rooms
-    socket.emit("chat message", "SERVER", "you have connected to " + newroom);
+    // socket.emit("chat message", "SERVER", "you have connected to " + newroom);
     // Alert rooms you left / joined
-    socket.broadcast
-      .to(socket.room)
-      .emit("chat message", "SERVER", socket.username + " has left this room");
-    socket.broadcast
-      .to(newroom)
-      .emit(
-        "chat message",
-        "SERVER",
-        socket.username + " has joined this room"
-      );
+    // socket.broadcast
+    //   .to(socket.room)
+    //   .emit("chat message", "SERVER", socket.username + " has left this room");
+    // socket.broadcast
+    //   .to(newroom)
+    //   .emit(
+    //     "chat message",
+    //     "SERVER",
+    //     socket.username + " has joined this room"
+    //   );
     // Update room session info
     socket.room = newroom;
     socket.emit("update rooms", history[newroom], allRooms, newroom);
+    io.emit("update users-all", usernames);
+    //io.emit("update users-room", usernames);
   });
 
   socket.on("disconnect", function() {
@@ -114,7 +147,8 @@ io.on("connection", function(socket) {
     socket.leave(socket.room);
     console.log(socket.username + " disconnected");
     delete usernames[socket.username];
-    io.sockets.emit("update users", usernames); // update list of users in chat, client-side
+    io.sockets.emit("update users-all", usernames); // update list of users in chat, client-side
+    //io.sockets.emit("update users-room", usernames);
     console.log(usernames);
   });
 
@@ -142,3 +176,37 @@ http.listen(3000, () => {
     fn(usernames);
   });
   */
+
+
+
+
+/* Notes on functions... to keep my head clear!
+
+Data Structures:
+  allRooms - List of all rooms
+  history - map room to all messages
+  usersRooms - map user to all connected rooms
+
+New user:
+  - add username to usernames
+  - add "Home" to usersRooms
+
+New Room:
+  - add room to allRooms
+  - add room to usersRooms
+  - create empty history to room
+
+Join (Connect) Room: 
+  - add room to usersRooms
+
+Leave (Disconnect) Room:
+  - remove room from usersRooms
+
+Delete Room (Remove room from entire server): 
+  - remove room from allRooms
+  - remove history of room
+  - somehow remove the room from every users usersRoom <<<<<<,
+
+Send Message:
+  - add message to room history
+*/

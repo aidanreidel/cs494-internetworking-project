@@ -26,6 +26,7 @@
         font-size: 25px;
       }
       h3 {
+        text-align: center;
         font-size: 20px;
       }
       .column {
@@ -178,18 +179,18 @@
         // document.getElementById("message-box").addEventListener("submit", e => {
         document.getElementById("send").addEventListener("click", e => {
           e.preventDefault();
-          console.log("html add room")
           const m = document.getElementById("m");
           socket.emit("chat message", m.value);
           m.value = "";
+          console.log("Send message to " + socket.room);
         });
 
         document.getElementById("send-all").addEventListener("click", e => {
           e.preventDefault();
-          console.log("html add room")
           const m = document.getElementById("m");
           socket.emit("chat message-all", m.value);
           m.value = "";
+          console.log("Send message to " + usersRooms[socket.username]);
         });
 
         document.getElementById("create-room").addEventListener("submit", e => {
@@ -218,6 +219,7 @@
         });
 
         socket.on("load msg history", history => {});
+        
         //append a li for each room on the server
         socket.on("update rooms", (history, roomList, room) => {
           // First load this room's message history
@@ -236,10 +238,20 @@
         });
 
         //append a li for each user in on the server
-        socket.on("update users", data => {
+        socket.on("update users-all", data => {
           removeChildren("userList");
           Object.values(data).forEach(element => {
             appendLi("userList", element);
+          });
+        });
+
+        // >> NOT YET IMPLEMENTED IN index.js
+        // >> No function should call this just yet.
+        // append a li for each user connected to the current room.
+        socket.on("update users-room", data => {
+          removeChildren("userRoomList");
+          Object.values(data).forEach(element => {
+            appendLi("roomUserList", element);
           });
         });
 
@@ -420,7 +432,16 @@
 
     <div class="column" id="users">
       <h2>Online Users</h2>
-      <ul id="userList"></ul>
+
+      <!-- <div id="roomUsers">
+        <h3>Connected to Room</h3>
+        <ul id="roomUserList"></ul>
+      </div> -->
+
+      <div id="allUsers">
+        <!-- <h3>All Users</h3> -->
+        <ul id="userList"></ul>
+      </div>
     </div>
   </body>
 </html>
