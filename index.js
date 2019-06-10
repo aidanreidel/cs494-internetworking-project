@@ -122,7 +122,12 @@ io.on("connection", function(socket) {
       );
     io.emit("update users-all", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
     //io.emit("update users-room", usernames);
-    socket.emit("update rooms", history[socket.room], allRooms, socket.room);
+    socket.emit(
+      "update rooms",
+      history[socket.room],
+      usersRooms[socket.username],
+      socket.room
+    );
     callback();
   });
 
@@ -181,7 +186,12 @@ io.on("connection", function(socket) {
     socket.join(newroom);
     // Update room session info
     socket.room = newroom;
-    socket.emit("update rooms", history[newroom], allRooms, newroom);
+    socket.emit(
+      "update rooms",
+      history[newroom],
+      usersRooms[socket.username],
+      newroom
+    );
     io.in(newroom).emit("update users", usersInRoom(newroom)); // Updates the users list for the new room
   });
 
