@@ -53,7 +53,7 @@ io.on("connection", function(socket) {
     socket.broadcast
       .to("Home") //Maybe list traversal here
       .emit("chat message", "SERVER", username + " has connected to this room");
-    io.in(socket.room).emit("update users", usersInRoom(socket.room));  // Updates user list for Home
+    io.in(socket.room).emit("update users", usersInRoom(socket.room)); // Updates user list for Home
   });
 
   socket.on("addroom", roomname => {
@@ -82,7 +82,7 @@ io.on("connection", function(socket) {
           "SERVER",
           socket.username + " has connected to this room"
         );
-      io.in(socket.room).emit("update users", usersInRoom(socket.room));  // Updates user list for the new room!
+      io.in(socket.room).emit("update users", usersInRoom(socket.room)); // Updates user list for the new room!
       socket.emit("update rooms", history[socket.room], allRooms, socket.room);
     } else {
       console.log(roomname + " already exists");
@@ -94,11 +94,42 @@ io.on("connection", function(socket) {
     }
   });
 
+  socket.on("join room", (roomname, callback) => {
+    usersRooms[socket.username].push(roomname); // add room to the user's connected rooms
+    // Change room into new room
+    socket.leave(socket.room);
+    socket.room = roomname; // store room name in the socket session for this client
+    socket.join(roomname); // send client to new room
+    console.log(allRooms); // log all rooms to console
+    console.log(usersRooms);
+
+    socket.emit(
+      "chat message",
+      "SERVER",
+      socket.username + " joined " + roomname + "!! Welcome in!"
+    ); // echo to client that that have joined
+    socket.broadcast
+      .to(roomname) //Maybe list traversal here
+      .emit(
+        "chat message",
+        "SERVER",
+        socket.username + " has connected to this room"
+      );
+    io.emit("update users-all", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
+    //io.emit("update users-room", usernames);
+    socket.emit("update rooms", history[socket.room], allRooms, socket.room);
+    callback();
+  });
+
   // Allows the client access to the global room list
   socket.on("get all rooms", fn => {
     fn(allRooms);
   });
 
+  // Show rooms that a user has not joined by subtracting the arrays
+  socket.on("get other rooms", fn => {
+    fn(allRooms.filter(x => !usersRooms[socket.username].includes(x)));
+  });
   // Removes a room from the global room list
   socket.on("remove room", room => {
     console.log(room);
@@ -107,7 +138,7 @@ io.on("connection", function(socket) {
       if (confirmed) console.log("Needs to be implemented!!");
     });
 
-    io.in(room).emit("update users", usersInRoom(room));  // Update connected users for specified room
+    io.in(room).emit("update users", usersInRoom(room)); // Update connected users for specified room
   });
 
   // Can a user be in more than one room at a time, but only see messages from one?
@@ -146,7 +177,7 @@ io.on("connection", function(socket) {
     // Update room session info
     socket.room = newroom;
     socket.emit("update rooms", history[newroom], allRooms, newroom);
-    io.in(newroom).emit("update users", usersInRoom(newroom));  // Updates the users list for the new room
+    io.in(newroom).emit("update users", usersInRoom(newroom)); // Updates the users list for the new room
   });
 
   socket.on("disconnect", function() {
@@ -173,7 +204,7 @@ io.on("connection", function(socket) {
 
     // Updates the user list to all of the rooms the user was connected to
     rooms.forEach(room => {
-      io.in(room).emit("update users", usersInRoom(room)); 
+      io.in(room).emit("update users", usersInRoom(room));
     });
 
     console.log(usernames);
