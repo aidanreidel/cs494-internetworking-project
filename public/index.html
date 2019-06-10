@@ -48,13 +48,16 @@
         float: right;
         display: inline-block;
       }*/
-      #userList, 
+      #userList,
       #room-list {
         width: inherit;
         list-style-type: none;
         padding: 5px;
       }
-      #create-room-btn, #leave-room-btn, #remove-room-btn, #join-room-btn {
+      #create-room-btn,
+      #leave-room-btn,
+      #remove-room-btn,
+      #join-room-btn {
         width: 190px;
         height: 40px;
         font-size: 20px;
@@ -64,19 +67,26 @@
         margin: 4px auto;
         padding: 4px;
       }
-      #create-room, #create-room-btn {
+      #create-room,
+      #create-room-btn {
         border: 3px solid #4caf50;
       }
-      #leave-room, #leave-room-btn {
+      #leave-room,
+      #leave-room-btn {
         border: 3px solid blue;
       }
-      #join-room, #join-room-btn {
+      #join-room,
+      #join-room-btn {
         border: 3px solid yellow;
       }
-      #remove-room, #remove-room-btn {
+      #remove-room,
+      #remove-room-btn {
         border: 3px solid purple;
       }
-      #create-room, #leave-room, #join-room, #remove-room {
+      #create-room,
+      #leave-room,
+      #join-room,
+      #remove-room {
         display: none;
         width: 190px;
         /* height: 190px; */
@@ -86,18 +96,19 @@
         text-align: center;
         padding-bottom: 2px;
       }
-      .form-popup input[type=text] {
+      .form-popup input[type="text"] {
         width: 95%;
         margin: 5px;
         padding: 5px;
         border: none;
         background: #f1f1f1;
       }
-      .form-popup input[type=text]:focus {
+      .form-popup input[type="text"]:focus {
         background-color: #ddd;
         outline: none;
       }
-      #submit-btn, .close-btn {
+      #submit-btn,
+      .close-btn {
         width: 98%;
         height: 40px;
         font-size: 20px;
@@ -109,12 +120,13 @@
         opacity: 0.8;
       }
       #submit-btn {
-        background-color: #4CAF50;
+        background-color: #4caf50;
       }
       .close-btn {
         background-color: red;
       }
-      #submit-btn:hover, .close-btn:hover {
+      #submit-btn:hover,
+      .close-btn:hover {
         opacity: 1;
       }
       .message-box-form {
@@ -200,16 +212,19 @@
           roomname.value = "";
         });
 
-        document.getElementById("remove-room-btn").addEventListener("click", e => {
-          e.preventDefault();
-          // list rooms from array into radio options
-          // append dynamically
-          rooms = getRoomsList();
-          removeChildren("remove-roomList");
-          rooms.forEach(element => {
-            appendLi("remove-roomList", element);
+        document
+          .getElementById("remove-room-btn")
+          .addEventListener("click", e => {
+            e.preventDefault();
+            // list rooms from array into radio options
+            // append dynamically
+            socket.emit("get all rooms", allRooms => {
+              removeChildren("remove-roomList");
+              allRooms.forEach(element => {
+                appendLi("remove-roomList", makeHrefFn("removeRoom", element));
+              });
+            });
           });
-        });
 
         document.getElementById("remove-room").addEventListener("submit", e => {
           e.preventDefault();
@@ -218,8 +233,6 @@
           // clear selected item?? close box?? update dynamic list??
         });
 
-        socket.on("load msg history", history => {});
-        
         //append a li for each room on the server
         socket.on("update rooms", (history, roomList, room) => {
           // First load this room's message history
@@ -232,7 +245,7 @@
           roomList.forEach(element => {
             if (element === room) appendLi("room-list", element);
             else {
-              appendLi("room-list", '<a href="#" onclick="changeRoom(\'' + element + "')\">" + element + "</a>");
+              appendLi("room-list", makeHrefFn("changeRoom", element));
             }
           });
         });
@@ -267,17 +280,21 @@
         });
 
         socket.on("listAllRoomsForm", data => {
-          var roomList = document.getElementById("join-roomList")
+          var roomList = document.getElementById("join-roomList");
 
           Object.values(data).forEach(element => {
-            var radioHtml = '<input type="radio" name="rooms" value='
+            var radioHtml = '<input type="radio" name="rooms" value=';
             radioHmtl += element;
             //appendLi("userList", element);
           });
         });
 
-        socket.on("createRadioElement", data => {
+        socket.on("confirm", (info, fn) => {
+          fn(confirm(info));
         });
+
+        // TODO: determine if needed
+        socket.on("createRadioElement", data => {});
       });
 
       // Helper Functions
@@ -291,6 +308,21 @@
         // li.setAttribute('class', 'item')
         l.appendChild(li);
         li.innerHTML = innerHTML;
+      };
+
+      const removeRoom = room => socket.emit("remove room", room);
+
+      // Extension of appendLi
+      const makeHrefFn = (fn, element) => {
+        return (
+          '<a href="#" onclick="' +
+          fn +
+          "('" +
+          element +
+          "')\">" +
+          element +
+          "</a>"
+        );
       };
       //removes all appended children to a given element
       const removeChildren = element => {
@@ -359,7 +391,9 @@
       <ul id="room-list"></ul>
 
       <!-- Join a room -->
-      <button id="join-room-btn" onclick="openJoinForm()"><b>Join Room</b></button>
+      <button id="join-room-btn" onclick="openJoinForm()">
+        <b>Join Room</b>
+      </button>
       <div class="form-popup">
         <form class="join-room-form" id="join-room">
           <h3>Join Room</h3>
@@ -367,54 +401,84 @@
           <!--List Available Rooms-->
           <div id="join-roomList"></div>
 
-          <input type="submit" id="submit-btn" value="Submit">
-          <input type="button" class="close-btn" onclick="closeJoinForm()" value="Cancel">
+          <input type="submit" id="submit-btn" value="Submit" />
+          <input
+            type="button"
+            class="close-btn"
+            onclick="closeJoinForm()"
+            value="Cancel"
+          />
         </form>
       </div>
 
       <!-- Join a room that the user is connected to -->
-      <button id="leave-room-btn" onclick="openLeaveForm()"><b>Leave Room</b></button>
+      <button id="leave-room-btn" onclick="openLeaveForm()">
+        <b>Leave Room</b>
+      </button>
       <div class="form-popup">
-        <form  class="leave-room" id="leave-room">
-            <h3>Leave Room</h3>
-            Select the room you want to disconnect from
-            <!--List available rooms-->
-            <ul id="leave-roomList"></ul>
+        <form class="leave-room" id="leave-room">
+          <h3>Leave Room</h3>
+          Select the room you want to disconnect from
+          <!--List available rooms-->
+          <ul id="leave-roomList"></ul>
 
-            <input type="submit" id="submit-btn" value="Submit">
-            <input type="button" class="close-btn" onclick="closeLeaveForm()" value="Cancel">
+          <input type="submit" id="submit-btn" value="Submit" />
+          <input
+            type="button"
+            class="close-btn"
+            onclick="closeLeaveForm()"
+            value="Cancel"
+          />
         </form>
       </div>
 
       <!-- Create a room that all users can join -->
-      <button id="create-room-btn" onclick="openCreateForm()"><b>Create Room</b></button>
+      <button id="create-room-btn" onclick="openCreateForm()">
+        <b>Create Room</b>
+      </button>
       <div class="form-popup">
         <form class="create-room-form" id="create-room">
-            <h3>Create Room</h3>
-            Can't find the room that you're looking for? Create one!<br>
-            <!-- <label for="roomName">Enter Room Name</label> -->
-            <input type="text" id="newRoomName" placeholder="Room Name" name="roomName" required>
+          <h3>Create Room</h3>
+          Can't find the room that you're looking for? Create one!<br />
+          <!-- <label for="roomName">Enter Room Name</label> -->
+          <input
+            type="text"
+            id="newRoomName"
+            placeholder="Room Name"
+            name="roomName"
+            required
+          />
 
-            <input type="submit" id="submit-btn" value="Submit">
-            <input type="button" class="close-btn" onclick="closeCreateForm()" value="Cancel">
+          <input type="submit" id="submit-btn" value="Submit" />
+          <input
+            type="button"
+            class="close-btn"
+            onclick="closeCreateForm()"
+            value="Cancel"
+          />
         </form>
       </div>
 
       <!-- Delete a room so no users can join -->
-      <button id="remove-room-btn" onclick="openRemoveForm()"><b>Remove Room</b></button>
+      <button id="remove-room-btn" onclick="openRemoveForm()">
+        <b>Remove Room</b>
+      </button>
       <div class="form-popup">
-        <form  class="remove-room" id="remove-room">
-            <h3>Remove Room</h3>
-            Let's clear up rooms not needed! Select one that you want to remove from the server
-            <!--List available rooms-->
-            <ul id="remove-roomList"></ul>
+        <form class="remove-room" id="remove-room">
+          <h3>Remove Room</h3>
+          Let's clear up rooms not needed! Select one that you want to remove
+          from the server
+          <!--List available rooms-->
+          <ul id="remove-roomList"></ul>
 
-            <input type="submit" id="submit-btn" value="Submit">
-            <input type="button" class="close-btn" onclick="closeRemoveForm()" value="Cancel">
+          <input
+            type="button"
+            class="close-btn"
+            onclick="closeRemoveForm()"
+            value="Cancel"
+          />
         </form>
       </div>
-      
-      
     </div>
 
     <div class="main">

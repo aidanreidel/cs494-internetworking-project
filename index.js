@@ -96,6 +96,19 @@ io.on("connection", function(socket) {
     }
   });
 
+  // Allows the client access to the global room list
+  socket.on("get all rooms", fn => {
+    fn(allRooms);
+  });
+  // Removes a room from the global room list
+  socket.on("remove room", room => {
+    console.log(room);
+    // TODO: deal with populated rooms, maybe move all clients to home
+    socket.emit("confirm", "Remove the room: " + room + "?", confirmed => {
+      if (confirmed) console.log("Needs to be implemented!!");
+    });
+  });
+
   // Can a user be in more than one room at a time, but only see messages from one?
   // Lets find out!
   socket.on("chat message", function(msg) {
