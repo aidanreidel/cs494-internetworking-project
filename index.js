@@ -65,7 +65,7 @@ io.on("connection", function(socket) {
       history[roomname] = [];
 
       // Change room into new room
-      //socket.leave(socket.room);
+      socket.leave(socket.room);
       socket.room = roomname; // store room name in the socket session for this client
       socket.join(roomname); // send client to new room
       console.log("All rooms: " + allRooms); // log all rooms to console
@@ -96,9 +96,41 @@ io.on("connection", function(socket) {
     }
   });
 
+  socket.on("join room", (roomname, callback) => {
+    usersRooms[socket.username].push(roomname); // add room to the user's connected rooms
+    // Change room into new room
+    socket.leave(socket.room);
+    socket.room = roomname; // store room name in the socket session for this client
+    socket.join(roomname); // send client to new room
+    console.log(allRooms); // log all rooms to console
+    console.log(usersRooms);
+
+    socket.emit(
+      "chat message",
+      "SERVER",
+      socket.username + " joined " + roomname + "!! Welcome in!"
+    ); // echo to client that that have joined
+    socket.broadcast
+      .to(roomname) //Maybe list traversal here
+      .emit(
+        "chat message",
+        "SERVER",
+        socket.username + " has connected to this room"
+      );
+    io.emit("update users-all", usernames); // This sends the user list over to the client <<<<<<<<<<------------ may not need this
+    //io.emit("update users-room", usernames);
+    socket.emit("update rooms", history[socket.room], allRooms, socket.room);
+    callback();
+  });
+
   // Allows the client access to the global room list
   socket.on("get all rooms", fn => {
     fn(allRooms);
+  });
+
+  // Show rooms that a user has not joined by subtracting the arrays
+  socket.on("get other rooms", fn => {
+    fn(allRooms.filter(x => !usersRooms[socket.username].includes(x)));
   });
   // Removes a room from the global room list
   socket.on("remove room", room => {
@@ -158,7 +190,12 @@ io.on("connection", function(socket) {
     //   );
     // Update room session info
     socket.room = newroom;
-    socket.emit("update rooms", history[newroom], allRooms, newroom);
+    socket.emit(
+      "update rooms",
+      history[newroom],
+      usersRooms[socket.username],
+      newroom
+    );
     io.emit("update users-all", usernames);
     //io.emit("update users-room", usernames);
   });

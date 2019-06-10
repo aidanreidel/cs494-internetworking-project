@@ -212,6 +212,23 @@
           roomname.value = "";
         });
 
+        // get the list of un joined rooms and list them out for the user to join
+        document
+          .getElementById("join-room-btn")
+          .addEventListener("click", e => {
+            e.preventDefault();
+            socket.emit("get other rooms", otherRooms => {
+              removeChildren("join-roomList");
+              if (otherRooms.length === 0) {
+                appendLi("join-roomList", "No rooms to join!");
+              } else {
+                otherRooms.forEach(element => {
+                  appendLi("join-roomList", makeHrefFn("joinRoom", element));
+                });
+              }
+            });
+          });
+
         document
           .getElementById("remove-room-btn")
           .addEventListener("click", e => {
@@ -312,7 +329,12 @@
 
       const removeRoom = room => socket.emit("remove room", room);
 
-      // Extension of appendLi
+      const joinRoom = room =>
+        socket.emit("join room", room, () => {
+          closeJoinForm();
+        });
+
+      // Extension for appendLi
       const makeHrefFn = (fn, element) => {
         return (
           '<a href="#" onclick="' +
