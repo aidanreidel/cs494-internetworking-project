@@ -174,18 +174,15 @@ io.on("connection", function(socket) {
       usersRooms[socket.username].splice(index, 1);
     }
     if (room === socket.room) {
+      oldroom = socket.room;
       socket.leave(socket.room);
       socket.join("Home");
       // Update room session info
       socket.room = "Home";
+      io.in(oldroom).emit("update users", usersInRoom(oldroom));
       io.in("Home").emit("update users", usersInRoom("Home")); // Updates the users list for the new room
     }
-    socket.emit(
-      "update rooms",
-      history[socket.room],
-      usersRooms[socket.username],
-      socket.room
-    );
+    socket.emit("update rooms", history[socket.room], usersRooms[socket.username], socket.room);
     callback();
   });
 
