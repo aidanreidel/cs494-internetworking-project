@@ -134,7 +134,7 @@ io.on("connection", function(socket) {
     if (!history[socket.room]) history[socket.room] = [];
     // Append this message into the specific room's chat history
     history[socket.room].push(socket.username + ": " + msg);
-    console.log(history); // TODO: remove
+    console.log(history);
     //send the message to the room in question
     io.in(socket.room).emit("chat message", socket.username, msg);
   });
@@ -169,7 +169,6 @@ io.on("connection", function(socket) {
   });
 
   socket.on("leave room", (room, callback) => {
-    // TODO: add notifications to the user?
     const index = usersRooms[socket.username].indexOf(room);
     if (index > -1) {
       usersRooms[socket.username].splice(index, 1);
