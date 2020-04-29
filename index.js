@@ -270,16 +270,10 @@ io.on('connect_failed', function () {
 })
 
 http.listen(3000, () => {
-  console.log('listening on *:3000')
+  console.log('listening on localhost:3000')
 })
-/*
-  leaving this in as an example for now
-  socket.on("getUsers", fn => {
-    fn(usernames);
-  });
-  */
 
-/* Notes on functions... to keep my head clear!
+/* Notes on functions
 
 Data Structures:
   allRooms - List of all rooms
