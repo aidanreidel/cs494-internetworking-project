@@ -2,13 +2,12 @@
   This project was started with the help of the socket.io getting started 
   guide, which can be found at: https://socket.io/get-started/chat/
 */
-var app = require('express')()
+const express = require('express')
+var app = express()
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/')
-})
+app.use(express.static('public'))
 
 const usernames = {}
 let allRooms = ['Home'] // List of all rooms available
