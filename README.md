@@ -8,9 +8,8 @@ This is a repo for our cs494 Internetworking protocols project!
 | --- | --- |
 | `node` Current | `12.5.0` |
 | `node` Past | `8.11.1` |
-| `npm` | 6.10.2 |
+| `npm` | `6.10.2` |
 
-This is a Node.js project, we are running node `v8.11.1`
 
 After cloning this project cd into the repo:
 
