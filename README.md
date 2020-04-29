@@ -30,4 +30,4 @@ After waiting for NPM to do its thing you should be able to run the project by r
 npm start
 ```
 
-Then in your favorite browser navigate to (localhost:3000)[http://localhost:3000] to see that app do it's thing. If you go that location on more than one tab you can chat with yourself, HOORAY!
+Then in your favorite browser navigate to [localhost:3000](http://localhost:3000) to see that app do it's thing. If you go that location on more than one tab you can chat with yourself, HOORAY!
